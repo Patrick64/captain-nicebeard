@@ -1,0 +1,49 @@
+{
+  "name": "js-game-server",
+  "description": "Sandboxed JavaScript Game Server",
+  "version": "0.1.0-1",
+  "author": "Aurélio A. Heckert <aurium@colivre.coop.br>",
+  "contributors": [
+    "Florent Cailhol <florent.cailhol@gmail.com>"
+  ],
+  "license": "AGPLv3",
+  "keywords": [
+    "game",
+    "server",
+    "sandbox"
+  ],
+  "repository": "aurium/js-game-server",
+  "engines": {
+    "node": ">=0.10"
+  },
+  "dependencies": {
+    "chalk": "0.5.x",
+    "commander": "2.3.x",
+    "ejs": "~0.8.5",
+    "express": "~4.7.2",
+    "merge": "1.1.x",
+    "sandboxer": "~0.1.0",
+    "socket.io": "1.0.x",
+    "stylus": "~0.42.3",
+    "winston": "~0.7.3"
+  },
+  "devDependencies": {
+    "eslint": "~0.7.4",
+    "mocha": "~1.20.1",
+    "shelljs": "~0.3.0",
+    "should": "~4.0.4",
+    "sinon": "~1.10.3"
+  },
+  "main": "./index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "lint": "eslint index.js lib/ test/",
+    "test": "npm run-script lint && mocha --reporter spec"
+  },
+  "bin": {
+    "js13k": "./bin/js13k",
+    "js13k-install": "./bin/js13k-install",
+    "js13k-uninstall": "./bin/js13k-uninstall"
+  },
+  "subdomain": "js13kserver"
+}

@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>My Game</title>
+    <!-- The socket.io client lib is for free. ;-) -->
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1>My Game</h1>
+    <ul id="log"></ul>
+    <script>
+      // Connect to the server:
+      socket = io(document.location.href);
+
+      socket.on('srv-msg', function(data) {
+        log.innerHTML += '<li>Received: '+ JSON.stringify(data) +'</li>';
+      });
+
+      function send(data) {
+        log.innerHTML += '<li>Sending: '+ JSON.stringify(data) +'</li>';
+        socket.emit('cli-msg', data);
+      }
+      send('Hello');
+      send(42);
+      send(['aa', 'bb', 'cc']);
+      send({ aa:111, bb:222 });
+    </script>
+  </body>
+</html>
