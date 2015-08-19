@@ -52,7 +52,7 @@ module.exports.spawn = function spawn(game) {
     try {
       sandbox.load(game.main);
     } catch (err) {
-      log.error('Game fail', err, {game:game.codeName});
+      log.error('Game fail at ' + err.stack, err, {game:game.codeName});
       game.server.close(); // Stop the server when the game crash.
       setTimeout(function(){
         // Delay game restart to avoid proc consumption from damaged code.

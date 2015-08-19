@@ -2,6 +2,8 @@ var io = require('sandbox-io');
 
 
 var worlds = [];
+var nextPlayerId = 1;
+var nextTokenId = 1;
 
 
 worlds.push(getNewWorld());
@@ -26,6 +28,8 @@ io.on('connection', function(socket) {
   
 });
 
+
+
 function receiveClientMessage(data) {
   if (data == 'Hello') {
     this.emit('srv-msg', { hello: 'Wold!' });
@@ -39,7 +43,6 @@ function receiveClientMessage(data) {
   }
 }
 
-var nextPlayerId = 1;
 
 function Player(socket,worldIndex,isForward) {
   this.playerId = nextPlayerId;
@@ -60,9 +63,7 @@ function Player(socket,worldIndex,isForward) {
   socket.on('tank-state', function(data) {
     //var events = JSON.parse(data);
     world.events.push.apply(world.events,data);
-    world.events.sort(function(a,b) { 
-      return (a.worldTime - b.worldTime);
-    });
+    
     console.log("Received " + data.length + " rows");
   });
   
@@ -72,12 +73,33 @@ Player.prototype.toPlainObject = function() {
   return {playerId:this.playerId,isForward:this.isForward};
 }
 
+function Token(maxX,maxY) {
+  this.xpos = Math.floor(Math.random()*maxX);
+  this.ypos = Math.floor(Math.random()*maxY);
+  this.tokenId = nextTokenId;
+  nextTokenId++;
+}
+Token.prototype.toPlainObject = function() {
+  return {
+    xpos:this.xpos,
+    ypos:this.ypos,
+    tokenId:this.tokenId
+  };
+}
+
+Token.prototype.addEvent = function(event) {
+
+}
+
 function World() {
  this.isForward=false;
- this.worldDuration=1*60*1000;
+ this.worldDuration=1*10*1000;
  this.events=[];
  this.players=[];
-
+ this.tokens = [];
+ for (var i=0;i<10;i++) {
+  this.tokens.push(new Token(800,600));
+ }
 }
 
 World.prototype.addPlayer = function(socket) {
@@ -86,12 +108,38 @@ World.prototype.addPlayer = function(socket) {
 }
 
 World.prototype.toPlainObject = function() {
+  // sort events in correct order
+  var events = this.events.slice();
+  if (this.isForward) {
+    // forward sort by start time
+    events.sort(function(a,b) { 
+        if (a.startTime < b.startTime) return -1; else return 1;
+        //return (a.startTime - b.startTime);
+    });
+  } else {
+    // reverse sort by end time
+    events.sort(function(a,b) { 
+        
+        if (a.endTime > b.endTime) 
+          return -1; 
+        else if (a.endTime < b.endTime)
+          return 1;
+        else if (a.startTime > b.startTime )
+          return -1;
+        else 
+          return 1;
+        //return (b.endTime - a.endTime);
+    });
+  }
   var f= {
     isForward:this.isForward,
     worldDuration:this.worldDuration,
-    events:this.events,
+    events:events,
     players:this.players.map(function(p) {
       return p.toPlainObject();
+    }),
+    tokens: this.tokens.map(function(t) {
+      return t.toPlainObject();
     })
   };
   return f;
