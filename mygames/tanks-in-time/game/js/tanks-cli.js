@@ -1,7 +1,9 @@
 
 
-var MAX_FORWARD = 20.0;
-var MAX_REVERSE = -20.0;
+var MAX_FORWARD = 2.0;
+var MAX_REVERSE = -2.0;
+var ACCELERATION = 50;
+var TURN_SPEED = 50;
 
 var carStraight = new Image();
 carStraight.src = "./res/car_straight.png";
@@ -62,21 +64,24 @@ function onLoad() {
 	
 	window.setInterval(function() {
 		recordTankState(player);
-		socket.emit('tank-state', eventsQueue,function() {
-			
-		});
+		// socket.emit('tank-state', eventsQueue,function() {});
 		eventsQueue = [];	
 	},1000)
 
-	
+	var lastFrameTime= Date.now();
 
 	var g = new Goo({width:800, height:600, 
 		container:document.getElementById("canvasholder"),
 		onDraw: function(g) {
+			// if (Math.random()*10>1) return;
+
 			g.ctx.clearRect(0,0,g.width,g.height);
+			var datenow = Date.now();
+			var delta = (datenow - lastFrameTime) / 1000;
+			lastFrameTime = datenow;
 
 			player.handleKeys(g);
-			player.tick(g);
+			player.tick(g,delta);
 			player.draw(g);
 
 			
@@ -99,7 +104,7 @@ function onLoad() {
 				}
 			}
 			Object.keys(otherPlayers).forEach(function(p) {
-				otherPlayers[p].tick(g);
+				otherPlayers[p].tick(g,delta);
 				otherPlayers[p].draw(g);
 			});
 
@@ -125,12 +130,66 @@ function onLoad() {
 	this.carImage = carStraight;
 	this.recordTankState = recordTankState;
 	this.isForward = isForward;
+	this.keyForward=false;
+	this.keyBackward=false;
+	this.keyLeft=false;
+	this.keyRight=false;
+	this.velocity = 0;
+	this.acceleration = 0;
   }
 
-  Tank.prototype.tick = function(g) {
+  Tank.prototype.tick = function(g,delta) {
+
+  	if (this.keyForward)
+  		this.acceleration = ACCELERATION; 
+		//this.speed = Math.min(MAX_FORWARD, this.speed+ ((0.4*60)*delta) );
+	  else if (this.keyReverse)
+	  	this.acceleration = -ACCELERATION;
+		//this.speed = Math.max(MAX_REVERSE, this.speed-((0.4*60)*delta));
+	  else
+	  {
+		//this.speed *= 1-((0.02*60)*delta);
+		
+		this.acceleration = 0;
+
+	  }
+	  
+	  
+	// rotate/turn
+	if (this.keyLeft)
+	{
+		this.angle = (this.angle - TURN_SPEED * delta) % 360;
+		this.carImage = carLeft;
+	}
+	else if (this.keyRight)
+	{
+		this.angle = (this.angle + TURN_SPEED * delta) % 360;
+		this.carImage = carRight;
+	}
+	else {
+		this.carImage = carStraight;
+	}
+
+	// 
+	if (this.acceleration) {
+		this.velocity = this.velocity + (this.acceleration * delta);
+	} else {
+		//this.velocity = this.velocity * 0.98;
+		if (Math.abs(this.velocity) < MAX_FORWARD/20) {
+			this.velocity = 0;
+		} else {
+			if (this.velocity>0)  
+				this.velocity -= ACCELERATION * delta; 
+			else 
+				this.velocity += ACCELERATION * delta; 
+		}
+	}
+	if (this.velocity>MAX_FORWARD) this.velocity = MAX_FORWARD;
+	if (this.velocity<MAX_REVERSE) this.velocity = MAX_REVERSE;
+
 	// move forward/backward
 	var x = 0;
-	var y = this.isForward ? this.speed : -this.speed;
+	var y = this.isForward ? this.velocity : -this.velocity;
 	
 	var angleRads = this.angle * (Math.PI / 180.0);
 	
@@ -140,7 +199,7 @@ function onLoad() {
 	this.xpos += deltaX;
 	this.ypos += deltaY;
 	
-	var carLength = 128;
+	var carLength = 100;
 	this.wrapped = false;
 	
 	if (this.xpos < - carLength) {
@@ -192,7 +251,10 @@ Tank.prototype.draw = function(g) {
 	//   g.ctx.lineWidth = 5;
 	//   g.ctx.stroke();
 	  
-	  g.ctx.drawImage(this.carImage, -carStraight.width/2, -carStraight.height/2);
+	  //g.ctx.drawImage(this.carImage, -carStraight.width/2, -carStraight.height/2);
+	  g.ctx.fillStyle = 'rgb(' + Math.floor(255-42.5) + ',' +
+                     Math.floor(255-42.5) + ',0)';
+		g.ctx.fillRect(-25, -50, 50, 100);
 	  g.ctx.restore();
 
   };
@@ -200,39 +262,15 @@ Tank.prototype.draw = function(g) {
   Tank.prototype.handleKeys = function(g) {
 
 	  // Support arrow keys, WASD and 2468
-	  var keyForward = g.keysDown[38] || g.keysDown[87] || g.keysDown[50];
-	  var keyReverse = g.keysDown[40] || g.keysDown[83] || g.keysDown[56];
-	  var keyLeft = g.keysDown[37] || g.keysDown[65] || g.keysDown[52];
-	  var keyRight = g.keysDown[39] || g.keysDown[68] || g.keysDown[54];
+	  this.keyForward = g.keysDown[38] || g.keysDown[87] || g.keysDown[50];
+	  this.keyReverse = g.keysDown[40] || g.keysDown[83] || g.keysDown[56];
+	  this.keyLeft = g.keysDown[37] || g.keysDown[65] || g.keysDown[52];
+	  this.keyRight = g.keysDown[39] || g.keysDown[68] || g.keysDown[54];
 
-	  if (keyForward)
-		this.speed = Math.min(MAX_FORWARD, this.speed+0.4);
-	  else if (keyReverse)
-		this.speed = Math.max(MAX_REVERSE, this.speed-0.4);
-	  else
-	  {
-		this.speed *= 0.98;
-		if (Math.abs(this.speed) < 0.5) this.speed = 0;
-	  }
 	  
-	  
-	// rotate/turn
-	if (keyLeft)
-	{
-		this.angle = (this.angle - 2 * (this.speed / MAX_FORWARD)) % 360;
-		this.carImage = carLeft;
-	}
-	else if (keyRight)
-	{
-		this.angle = (this.angle + 2 * (this.speed / MAX_FORWARD)) % 360;
-		this.carImage = carRight;
-	}
-	else {
-		this.carImage = carStraight;
-	}
 	
 	
-	if (keyLeft || keyRight || keyForward || keyReverse)
+	if (this.keyLeft || this.keyRight || this.keyForward || this.keyReverse)
 		this.recordTankState(this);
 
 
