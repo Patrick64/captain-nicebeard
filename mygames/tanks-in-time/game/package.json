@@ -1,6 +1,6 @@
 {
   "name": "tanks-in-time",
-  "main": "my-game.js", // <-- this attribute allows you to chose your server-side main file name.
+  "main": "my-game.js", 
   "author": "Patrick Woodcock @jimmynoshoes",
   "license": ""
 }
