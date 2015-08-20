@@ -50,11 +50,11 @@ function onLoad() {
 	window.setInterval(function() {
 		var curTime = getCurTime();
 		//recordTankState(player);
-		world.updateLastEventInQueue(curTime);
+		var eventQueues = world.getQueuedEvents(curTime);
 
-		socket.emit('tank-state', world.eventsQueue,function() {});
-		world.eventsQueue = [];	
-		world.recordTankState(world.player,curTime);
+		socket.emit('tank-state', eventQueues,function() {});
+		world.flushQueuedEvents(curTime);
+
 	},1000)
 
 	var lastFrameTime= Date.now();
@@ -252,21 +252,6 @@ Tank.prototype.draw = function(g) {
 	g.ctx.translate(this.xpos, this.ypos);
 	g.ctx.rotate(angleRads);
 
-	// if (this.speed != 0) {
-	// 	  // reset our trail
-	// 	  if (counter++ > 1000) {
-	// 		g.ctx.beginPath();
-	// 		g.ctx.moveTo(0,-carStraight.height/2-10);
-	// 		counter = 0;
-	// 	  }
-	//   }    
-	//   g.ctx.strokeStyle = "orange";
-	//   if (this.wrapped)
-	// 	g.ctx.moveTo(0,-carStraight.height/2-10);
-	//   g.ctx.lineTo(0,0);
-	//   g.ctx.lineWidth = 5;
-	//   g.ctx.stroke();
-	  
 	  //g.ctx.drawImage(this.carImage, -carStraight.width/2, -carStraight.height/2);
 	 if (this.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
 
@@ -399,5 +384,25 @@ World.prototype.updateLastEventInQueue = function(curTime) {
 
 }
 
+World.prototype.getQueuedEvents = function(curTime) {
+	this.updateLastEventInQueue(curTime);
+	return {
+		player:this.eventsQueue,
+		tokens:Object.keys(this.tokens).reduce(
+			function(obj,tokenId) { 
+				obj[tokenId] = this.tokens[tokenId].eventsQueue;
+				return obj;
+			}.bind(this),{})
+	};
+}
+
+World.prototype.flushQueuedEvents = function(curTime) {
+	this.eventsQueue = [];
+	Object.keys(this.tokens).forEach(
+		function(id) { 
+			this.tokens[id].eventsQueue = []; 
+		}.bind(this));
+	this.recordTankState(this.player,curTime);
+}
 
 onLoad();

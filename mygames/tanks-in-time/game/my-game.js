@@ -63,9 +63,9 @@ function Player(socket,worldIndex,isForward) {
 
   socket.on('tank-state', function(data) {
     //var events = JSON.parse(data);
-    world.events.push.apply(world.events,data);
+    world.events.push.apply(world.events,data.player);
     
-    console.log("Received " + data.length + " rows");
+    console.log("Received " + data.player.length + " rows");
   });
   
 }
