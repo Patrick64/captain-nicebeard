@@ -52,12 +52,13 @@ function Player(socket,worldIndex,isForward) {
   this.isForward = isForward;
 
   var world = worlds[this.worldIndex];
-  var game = {playerId:this.playerId,
+  var game = {player:this.toPlainObject(),
     world:world.toPlainObject()
     //
     //players:world.players
   };
   //socket.on('disconnect', this.onExit.bind(this));
+  debugger;
   socket.emit("receive-game",game);
 
   socket.on('tank-state', function(data) {
@@ -104,12 +105,15 @@ function World() {
 
 World.prototype.addPlayer = function(socket) {
   this.isForward = !this.isForward;
-  this.players.push(new Player(socket,0,this.isForward));
+  var player = new Player(socket,0,this.isForward);
+  this.players.push(player);
 }
 
 World.prototype.toPlainObject = function() {
   // sort events in correct order
+  debugger;  
   var events = this.events.slice();
+  debugger;
   if (this.isForward) {
     // forward sort by start time
     events.sort(function(a,b) { 
@@ -131,6 +135,7 @@ World.prototype.toPlainObject = function() {
         //return (b.endTime - a.endTime);
     });
   }
+  debugger;
   var f= {
     isForward:this.isForward,
     worldDuration:this.worldDuration,

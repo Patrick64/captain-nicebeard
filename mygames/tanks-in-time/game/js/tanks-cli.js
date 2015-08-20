@@ -1,4 +1,4 @@
-
+'use strict';
 
 var MAX_FORWARD = 2.0;
 var MAX_REVERSE = -2.0;
@@ -22,17 +22,17 @@ function onLoad() {
 	  socket.on('receive-game', function(data) {
 		//log.innerHTML += '<li>Received: '+ JSON.stringify(data) +'</li>';
 		//var game =  JSON.parse(data);
-		newGame(data.world,data.playerId,socket);
+		newGame(data.world,data.player,socket);
 	});
 
   }
 
-  function newGame(worldData,playerId,socket) {
+  function newGame(worldData,player,socket) {
 	var startTime = Date.now();
 	var curEventIndex = 0; //world.isForward ? 0 : world.events.length-1;
 	// var eventsQueue = [];
 	var timerElement = document.getElementById('worldTime');
-	var world = new World(worldData);
+	var world = new World(worldData,player);
 
 	function getCurTime() {
 		if (world.isForward) 
@@ -63,6 +63,7 @@ function onLoad() {
 		container:document.getElementById("canvasholder"),
 		onDraw: function(g) {
 //			 if (Math.random()*10>1) return;
+			var curTime = getCurTime();
 
 			g.ctx.clearRect(0,0,g.width,g.height);
 			var datenow = Date.now();
@@ -74,7 +75,7 @@ function onLoad() {
 			world.player.draw(g);
 
 			
-			var curTime = getCurTime();
+			
 			if (world.isForward) {
 				while (curEventIndex < world.events.length && world.events[curEventIndex].startTime < curTime ) {
 					var curEvent = world.events[curEventIndex];
@@ -117,11 +118,11 @@ function onLoad() {
 
   }
 
-  function Tank(world,isForward) {
+  function Tank(world,isForward,playerId) {
 	this.angle = 0;
 	this.xpos = 400;
 	this.ypos = 200;
-	
+	this.playerId = playerId;
 	this.carImage = carStraight;
 	this.world = world;
 	this.isForward = isForward;
@@ -232,13 +233,15 @@ Tank.prototype.setState = function(state) {
 		this.xpos = state.xpos;
 		this.ypos = state.ypos;
 	}
-	this.lastState = state;
 	
-	this.keyForward = state.keyForward;
-	this.keyReverse = state.keyReverse;
-	this.keyLeft = state.keyLeft;
-	this.keyRight = state.keyRight;
+	if (this.lastState || !this.isForward) {
+		this.keyForward = state.keyForward;
+		this.keyReverse = state.keyReverse;
+		this.keyLeft = state.keyLeft;
+		this.keyRight = state.keyRight;
+	}
 
+	this.lastState = state;
 	//this.velocity = state.velocity ;
 	//this.acceleration = state.acceleration;
 }
@@ -328,7 +331,7 @@ Token.prototype.comparePlayer = function(player,worldTime) {
 		this.visible=false;
 		this.eventsQueue.push({
 			startTime: worldTime,
-			endTime: null,
+			endTime: worldTime,
 			visible: this.visible,
 			playerId: player.playerId
 		});
@@ -346,10 +349,10 @@ function dist(a,b) {
 	return Math.sqrt(x*x+y*y);
 }
 
-function World(worldData) {
+function World(worldData,player) {
 	this.events = worldData.events;	
 	this.eventsQueue = [];
-	this.player = new Tank(this,true);
+	this.player = new Tank(this,true,player.playerId);
 	this.otherPlayers = {};
 	this.tokens = {};
 	this.isForward = worldData.isForward;
