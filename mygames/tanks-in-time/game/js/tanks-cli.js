@@ -79,29 +79,29 @@ function onLoad() {
 			if (world.isForward) {
 				while (curEventIndex < world.events.length && world.events[curEventIndex].startTime < curTime ) {
 					var curEvent = world.events[curEventIndex];
-					if (world.otherPlayers[curEvent.playerId]) {
-						world.otherPlayers[curEvent.playerId].setState(curEvent);
+					if (world.otherTanks[curEvent.tankId]) {
+						world.otherTanks[curEvent.tankId].setState(curEvent);
 					}
 					curEventIndex++;
 				}
 			} else {
 				while (curEventIndex < world.events.length && world.events[curEventIndex].endTime > curTime ) {
 					var curEvent = world.events[curEventIndex];
-					if (world.otherPlayers[curEvent.playerId]) {
-						world.otherPlayers[curEvent.playerId].setState(curEvent);
+					if (world.otherTanks[curEvent.tankId]) {
+						world.otherTanks[curEvent.tankId].setState(curEvent);
 					}
 					curEventIndex++;
 				}
 			}
 			Object.keys(world.tokens).forEach(function(t) {
-				world.tokens[t].comparePlayer(world.player,curTime);
+				world.tokens[t].compareTank(world.player,curTime);
 				world.tokens[t].tick(delta,curTime);
 				world.tokens[t].draw(g);
 			});
 
-			Object.keys(world.otherPlayers).forEach(function(p) {
-				world.otherPlayers[p].tick(g,delta);
-				world.otherPlayers[p].draw(g);
+			Object.keys(world.otherTanks).forEach(function(p) {
+				world.otherTanks[p].tick(g,delta);
+				world.otherTanks[p].draw(g);
 			});
 
 
@@ -119,11 +119,11 @@ function onLoad() {
 
   }
 
-  function Tank(world,isForward,playerId) {
+  function Tank(world,isForward,tankId) {
 	this.angle = 0;
 	this.xpos = 400;
 	this.ypos = 200;
-	this.playerId = playerId;
+	this.tankId = tankId;
 	this.carImage = carStraight;
 	this.world = world;
 	this.isForward = isForward;
@@ -333,14 +333,14 @@ Token.prototype.tick= function(delta,worldTime) {
 
 }
 
-Token.prototype.comparePlayer = function(player,worldTime) {
+Token.prototype.compareTank = function(player,worldTime) {
 	if (dist(this,player)<50 && this.visible)	{
 		this.visible=false;
 		this.eventsQueue.push({
 			startTime: worldTime,
 			endTime: worldTime,
 			visible: this.visible,
-			playerId: player.playerId,
+			tankId: player.tankId,
 			isForward: this.isWorldForward
 		});
 	}
@@ -360,13 +360,13 @@ function dist(a,b) {
 function World(worldData,player) {
 	this.events = worldData.events;	
 	this.eventsQueue = [];
-	this.player = new Tank(this,true,player.playerId);
-	this.otherPlayers = {};
+	this.player = new Tank(this,true,player.tankId);
+	this.otherTanks = {};
 	this.tokens = {};
 	this.isForward = worldData.isForward;
 	this.worldDuration = worldData.worldDuration;
 	worldData.players.forEach(function(p) {
-		this.otherPlayers[p.playerId] = new Tank(this,(p.isForward == this.isForward));
+		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward));
 	}.bind(this));
 	worldData.tokens.forEach(function(t) {
 		this.tokens[t.tokenId] = new Token(t,this.isForward);
@@ -380,7 +380,7 @@ World.prototype.recordTankState = function(player,curTime) {
 	this.updateLastEventInQueue(curTime);
 	this.eventsQueue.push(
 	{
-		playerId:player.playerId,
+		tankId:player.tankId,
 		startTime: curTime,
 		endTime: curTime,
 		angle:player.angle,

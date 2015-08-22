@@ -2,7 +2,7 @@ var io = require('sandbox-io');
 
 
 var worlds = [];
-var nextPlayerId = 1;
+var nextTankId = 1;
 var nextTokenId = 1;
 
 
@@ -19,7 +19,7 @@ io.on('connection', function(socket) {
   log.debug('New connection', socket.id);
   // Send a message to this player:
   var world = worlds[0];
-  world.addPlayer(socket);
+  world.startGame(socket);
   
   //socket.emit('srv-msg', { message: 'Welcome!' });
   // Link a receiveClientMessage reference to this socket
@@ -44,9 +44,9 @@ function receiveClientMessage(data) {
 }
 
 
-function Player(socket,worldIndex,isForward) {
-  this.playerId = nextPlayerId;
-  nextPlayerId++;
+function Tank(socket,worldIndex,isForward) {
+  this.tankId = nextTankId;
+  nextTankId++;
   this.worldIndex = worldIndex;
   this.socket = socket;
   this.isForward = isForward;
@@ -70,8 +70,8 @@ function Player(socket,worldIndex,isForward) {
   
 }
 
-Player.prototype.toPlainObject = function() {
-  return {playerId:this.playerId,isForward:this.isForward};
+Tank.prototype.toPlainObject = function() {
+  return {tankId:this.tankId,isForward:this.isForward};
 }
 
 function Token(maxX,maxY) {
@@ -116,9 +116,9 @@ function World() {
  }
 }
 
-World.prototype.addPlayer = function(socket) {
+World.prototype.startGame = function(socket) {
   this.isForward = !this.isForward;
-  var player = new Player(socket,0,this.isForward);
+  var player = new Tank(socket,0,this.isForward);
   this.players.push(player);
 }
 
