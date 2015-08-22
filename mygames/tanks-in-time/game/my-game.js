@@ -4,6 +4,8 @@ var io = require('sandbox-io');
 var worlds = [];
 var nextTankId = 1;
 var nextTokenId = 1;
+var nextPlayerId = 1;
+var players = [];
 
 
 worlds.push(getNewWorld());
@@ -18,44 +20,29 @@ io.on('connection', function(socket) {
   // See the generated log in the server console:
   log.debug('New connection', socket.id);
   // Send a message to this player:
-  var world = worlds[0];
-  world.startGame(socket);
   
-  //socket.emit('srv-msg', { message: 'Welcome!' });
-  // Link a receiveClientMessage reference to this socket
-  // and add it as a listener for 'cli-msg' events:
-  //socket.on('cli-msg', receiveClientMessage.bind(socket));
+  
+  var player = new Player();
+  player.newGame(socket);
+  
   
 });
 
 
 
-function receiveClientMessage(data) {
-  if (data == 'Hello') {
-    this.emit('srv-msg', { hello: 'Wold!' });
-  } else {
-    this.emit('srv-msg', {
-      data: data,
-      msg: 'This data is a ' +
-       data.constructor.toString().replace(/^function ([^(]+).*/, '$1')
-      }
-    );
-  }
+function Player() {
+  this.playerId = nextPlayerId;
+  nextPlayerId++;
+  this.world =  worlds[0];
+  this.isForward = true;
 }
 
+Player.prototype.newGame = function(socket) {
+  this.tank = new Tank(0,this.isForward);
+  this.world.addTank(this.tank);
 
-function Tank(socket,worldIndex,isForward) {
-  this.tankId = nextTankId;
-  nextTankId++;
-  this.worldIndex = worldIndex;
-  this.socket = socket;
-  this.isForward = isForward;
-
-  var world = worlds[this.worldIndex];
-  var game = {player:this.toPlainObject(),
-    world:world.toPlainObject()
-    //
-    //players:world.players
+  var game = {player:this.tank.toPlainObject(),
+    world:this.world.toPlainObject(this.isForward)
   };
   //socket.on('disconnect', this.onExit.bind(this));
   debugger;
@@ -64,9 +51,21 @@ function Tank(socket,worldIndex,isForward) {
   socket.on('tank-state', function(data) {
     //var events = JSON.parse(data);
 
-    world.addEvents(data);
+    this.world.addEvents(data);
     console.log("Received " + data.player.length + " rows");
-  });
+  }.bind(this));
+
+}
+
+function Tank(worldIndex,isForward) {
+  this.tankId = nextTankId;
+  nextTankId++;
+  this.worldIndex = worldIndex;
+  
+  this.isForward = isForward;
+
+  var world = worlds[this.worldIndex];
+  
   
 }
 
@@ -106,20 +105,18 @@ Token.prototype.getEvents = function() {
 }
 
 function World() {
- this.isForward=false;
+ 
  this.worldDuration=1*10*1000;
  this.events=[];
- this.players=[];
+ this.tanks=[];
  this.tokens = [];
  for (var i=0;i<10;i++) {
   this.tokens.push(new Token(800,600));
  }
 }
 
-World.prototype.startGame = function(socket) {
-  this.isForward = !this.isForward;
-  var player = new Tank(socket,0,this.isForward);
-  this.players.push(player);
+World.prototype.addTank = function(tank) {
+  this.tanks.push(tank);
 }
 
 World.prototype.addEvents = function(data) {
@@ -132,12 +129,12 @@ World.prototype.addEvents = function(data) {
   });
 }
 
-World.prototype.toPlainObject = function() {
+World.prototype.toPlainObject = function(isForward) {
   // sort events in correct order
   debugger;  
   var events = this.events.slice();
   debugger;
-  if (this.isForward) {
+  if (isForward) {
     // forward sort by start time
     events.sort(function(a,b) { 
         if (a.startTime < b.startTime) return -1; else return 1;
@@ -160,10 +157,10 @@ World.prototype.toPlainObject = function() {
   }
   debugger;
   var f= {
-    isForward:this.isForward,
+    isForward:isForward,
     worldDuration:this.worldDuration,
     events:events,
-    players:this.players.map(function(p) {
+    players:this.tanks.map(function(p) {
       return p.toPlainObject();
     }),
     tokens: this.tokens.map(function(t) {
