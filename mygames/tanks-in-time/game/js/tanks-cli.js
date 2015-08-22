@@ -55,7 +55,7 @@ function onLoad() {
 		socket.emit('tank-state', eventQueues,function() {});
 		world.flushQueuedEvents(curTime);
 
-	},1000)
+	},10000)
 
 	var lastFrameTime= Date.now();
 
@@ -95,6 +95,7 @@ function onLoad() {
 			}
 			Object.keys(world.tokens).forEach(function(t) {
 				world.tokens[t].comparePlayer(world.player,curTime);
+				world.tokens[t].tick(delta,curTime);
 				world.tokens[t].draw(g);
 			});
 
@@ -281,12 +282,20 @@ Tank.prototype.draw = function(g) {
 
 }
 
-function Token(tokendata) {
+function Token(tokendata,isWorldForward) {
 	this.xpos = tokendata.xpos;
 	this.ypos = tokendata.ypos;
-	this.visible = true;
+	this.isWorldForward = isWorldForward;
 	this.events = tokendata.events;
 	this.eventsQueue = [];
+	if (this.isWorldForward) { // going forward
+		this.visible = true;
+		this.events.sort(function(a,b) { return a.startTime - b.startTime; });
+	} else {
+		this.visible = false;
+		this.events.sort(function(a,b) { return b.startTime - a.startTime; });
+	}
+	this.curEventIndex=0;
 }
 
 Token.prototype.draw = function(g) {
@@ -307,7 +316,20 @@ Token.prototype.draw = function(g) {
 
 }
 
-Token.prototype.tick= function(delta) {
+Token.prototype.tick= function(delta,worldTime) {
+	if (this.isWorldForward) {
+		while (this.curEventIndex < this.events.length && (this.events[this.curEventIndex].startTime < worldTime )) {
+			var curEvent = this.events[this.curEventIndex];
+			this.visible = curEvent.isForward ? curEvent.visible : !curEvent.visible;
+			this.curEventIndex++;
+		}
+	} else {
+		while (this.curEventIndex < this.events.length && (this.events[this.curEventIndex].startTime > worldTime )) {
+			var curEvent = this.events[this.curEventIndex];
+			this.visible = curEvent.isForward ? !curEvent.visible : curEvent.visible;
+			this.curEventIndex++;
+		}
+	}
 
 }
 
@@ -318,7 +340,8 @@ Token.prototype.comparePlayer = function(player,worldTime) {
 			startTime: worldTime,
 			endTime: worldTime,
 			visible: this.visible,
-			playerId: player.playerId
+			playerId: player.playerId,
+			isForward: this.isWorldForward
 		});
 	}
 
@@ -346,7 +369,7 @@ function World(worldData,player) {
 		this.otherPlayers[p.playerId] = new Tank(this,(p.isForward == this.isForward));
 	}.bind(this));
 	worldData.tokens.forEach(function(t) {
-		this.tokens[t.tokenId] = new Token(t);
+		this.tokens[t.tokenId] = new Token(t,this.isForward);
 	}.bind(this));
 
 }

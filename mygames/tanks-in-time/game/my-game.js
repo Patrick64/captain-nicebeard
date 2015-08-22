@@ -63,8 +63,8 @@ function Player(socket,worldIndex,isForward) {
 
   socket.on('tank-state', function(data) {
     //var events = JSON.parse(data);
-    world.events.push.apply(world.events,data.player);
-    
+
+    world.addEvents(data);
     console.log("Received " + data.player.length + " rows");
   });
   
@@ -78,18 +78,31 @@ function Token(maxX,maxY) {
   this.xpos = Math.floor(Math.random()*maxX);
   this.ypos = Math.floor(Math.random()*maxY);
   this.tokenId = nextTokenId;
+  this.events = [];
   nextTokenId++;
 }
 Token.prototype.toPlainObject = function() {
   return {
     xpos:this.xpos,
     ypos:this.ypos,
-    tokenId:this.tokenId
+    tokenId:this.tokenId,
+    events:this.getEvents()
   };
 }
 
-Token.prototype.addEvent = function(event) {
+Token.prototype.addEvents = function(events) {
+  this.events.push.apply(this.events,events);
+}
 
+Token.prototype.getEvents = function() {
+  // var events = this.events.slice();
+  // events.sort(function(a,b) {
+  //     if (isForward)
+  //       return a.startTime - b.startTime;
+  //     else
+  //       return b.startTime - a.startTime;
+  // });
+  return this.events;
 }
 
 function World() {
@@ -107,6 +120,16 @@ World.prototype.addPlayer = function(socket) {
   this.isForward = !this.isForward;
   var player = new Player(socket,0,this.isForward);
   this.players.push(player);
+}
+
+World.prototype.addEvents = function(data) {
+  this.events.push.apply(this.events,data.player);
+  this.tokens.forEach(function(t) {
+    if (data.tokens[t.tokenId]) {
+      var events = data.tokens[t.tokenId];
+      t.addEvents(events);
+    }
+  });
 }
 
 World.prototype.toPlainObject = function() {
