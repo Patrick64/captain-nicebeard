@@ -76,16 +76,19 @@ function onLoad() {
 	}
 	
 	var sendStateInterval = window.setInterval(function() {
-		sendGameState();
+	//	sendGameState();
 
 	},1000);
 
 	
 
 	function endLevel() {
+		var curTime = getCurTime();
 		maingame.onDraw = function() {};
 		maingame.onKeyPress = function(g) {};
 		clearInterval(sendStateInterval);	
+		world.recordTankState(world.player,curTime);
+		sendGameState();
 		maingame.endLevel();
 	}
 	maingame.onKeyPress = function(g) {
@@ -173,6 +176,7 @@ function onLoad() {
 	this.acceleration = 0;
 	this.lastState = null;
 	this.bullets = [];
+	this.active = true;
   }
 
   Tank.prototype.tick = function(g,delta,world) {
@@ -300,23 +304,24 @@ Tank.prototype.setState = function(state) {
 }
 
 Tank.prototype.draw = function(g) {
-	var angleRads = this.angle * (Math.PI / 180.0);
-	g.ctx.save();
-	g.ctx.translate(this.xpos, this.ypos);
-	g.ctx.rotate(angleRads);
+	if (this.active) {
+		var angleRads = this.angle * (Math.PI / 180.0);
+		g.ctx.save();
+		g.ctx.translate(this.xpos, this.ypos);
+		g.ctx.rotate(angleRads);
 
-	  //g.ctx.drawImage(this.carImage, -carStraight.width/2, -carStraight.height/2);
-	 if (this.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
+		  //g.ctx.drawImage(this.carImage, -carStraight.width/2, -carStraight.height/2);
+		 if (this.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
 
-	  //g.ctx.fillStyle = 'rgb(' + Math.floor(255-42.5) + ',' +Math.floor(255-42.5) + ',0)';
-		g.ctx.fillRect(-25, -50, 50, 100);
-		g.ctx.fillStyle = "grey";
-		g.ctx.fillRect(-5,0,10,50);
-		
-	  g.ctx.restore();
+		  //g.ctx.fillStyle = 'rgb(' + Math.floor(255-42.5) + ',' +Math.floor(255-42.5) + ',0)';
+			g.ctx.fillRect(-25, -50, 50, 100);
+			g.ctx.fillStyle = "grey";
+			g.ctx.fillRect(-5,0,10,50);
+			
+		  g.ctx.restore();
 
-	  this.bullets.forEach(function(b) { b.draw(g); });
-
+		  this.bullets.forEach(function(b) { b.draw(g); });
+	}
   };
 
   Tank.prototype.handleKeys = function(g,curTime) {
@@ -334,6 +339,11 @@ Tank.prototype.draw = function(g) {
 	 if (curKeyCombo != lastKeyCombo)
 	 	this.world.recordTankState(this,curTime);
 
+
+}
+
+Tank.prototype.hit = function(byTank) {
+	this.active = false;
 
 }
 
@@ -427,8 +437,10 @@ Bullet.prototype.tick = function(delta,world) {
 			this.ypos += deltaY;
 
 			Object.keys(world.otherTanks).forEach(function(tankId) {
-				if (dist(world.otherTanks[tankId],this)<40) {
+				var otherTank = world.otherTanks[tankId];
+				if (dist(otherTank,this)<40) {
 					this.active=false;
+					otherTank.hit(this);
 
 				}
 
