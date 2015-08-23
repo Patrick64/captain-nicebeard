@@ -2,6 +2,7 @@
 
 function GameEvent(events,isWorldForward) {
 	this.events = [];
+	if (events) this.addEvents(events);
 	this.isWorldForward = isWorldForward;
 	this.curEventIndex=0;
 }

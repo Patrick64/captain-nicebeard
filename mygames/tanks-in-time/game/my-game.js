@@ -91,7 +91,8 @@ function Tank(worldIndex,isForward) {
 Tank.prototype.toPlainObject = function() {
   return {tankId:this.tankId,
     isForward:this.isForward,
-    events:this.events};
+    events:{movements:this.events}
+  };
 }
 
 

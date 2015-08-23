@@ -17,15 +17,16 @@
 	this.lastState = null;
 	this.bullets = [];
 	this.active = true;
-	this.events = tankData ? tankData.events : [];
+	this.events = tankData ? tankData.events : {movements:[]};
+	
 	if (world.isForward) {
 	    // forward sort by start time
-	    this.events.sort(function(a,b) { 
+	    this.events.movements.sort(function(a,b) { 
 	        if (a.startTime < b.startTime) return -1; else return 1;
 	    });
 	  } else {
 	    // reverse sort by end time
-	    this.events.sort(function(a,b) { 
+	    this.events.movements.sort(function(a,b) { 
 	        
 	        if (a.endTime > b.endTime) 
 	          return -1; 
@@ -44,14 +45,14 @@
   Tank.prototype.tick = function(g,delta,world,curTime) {
 
 	if (this.world.isForward) {
-		while (this.curEventIndex < this.events.length && this.events[this.curEventIndex].startTime < curTime ) {
-			var curEvent = this.events[this.curEventIndex];
+		while (this.curEventIndex < this.events.movements.length && this.events.movements[this.curEventIndex].startTime < curTime ) {
+			var curEvent = this.events.movements[this.curEventIndex];
 			this.setState(curEvent);
 			this.curEventIndex++;
 		}
 	} else {
-		while (this.curEventIndex < this.events.length && this.events[this.curEventIndex].endTime > curTime ) {
-			var curEvent = this.events[this.curEventIndex];
+		while (this.curEventIndex < this.events.movements.length && this.events.movements[this.curEventIndex].endTime > curTime ) {
+			var curEvent = this.events.movements[this.curEventIndex];
 			this.setState(curEvent);
 			this.curEventIndex++;
 		}
