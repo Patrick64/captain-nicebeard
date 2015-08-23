@@ -24,7 +24,16 @@ io.on('connection', function(socket) {
   
   var player = new Player();
   player.newGame(socket);
+  socket.on('new-game', function(data) {
+    player.isForward = !player.isForward;
+    player.newGame(socket);
+  });
+
+  socket.on('tank-state', function(data) {
+    //var events = JSON.parse(data);
+    player.receiveGameState(data);
   
+  });
   
 });
 
@@ -48,13 +57,12 @@ Player.prototype.newGame = function(socket) {
   debugger;
   socket.emit("receive-game",game);
 
-  socket.on('tank-state', function(data) {
-    //var events = JSON.parse(data);
 
+}
+
+Player.prototype.receiveGameState = function (data) {
     this.world.addEvents(data);
     console.log("Received " + data.player.length + " rows");
-  }.bind(this));
-
 }
 
 function Tank(worldIndex,isForward) {

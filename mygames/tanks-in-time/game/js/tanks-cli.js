@@ -1,8 +1,8 @@
 'use strict';
 
-var MAX_FORWARD = 2.0;
-var MAX_REVERSE = -2.0;
-var ACCELERATION = 50;
+var MAX_FORWARD = 3.0;
+var MAX_REVERSE = -3.0;
+var ACCELERATION = 10;
 var TURN_SPEED = 80;
 
 var carStraight = new Image();
@@ -19,15 +19,34 @@ function onLoad() {
 	  // Connect to the server:
 	  var socket = io(document.location.href);
 	  
+	  var maingame = {
+	  	onDraw: function(g) {},
+	  	endLevel: function() {
+
+	  		socket.emit('new-game', {},function() {});
+
+	  	},
+	  	lastTank: null,
+	  	onKeyPress: function(key) {  	}
+	  }
+		var g = new Goo({width:800, height:600, 
+		container:document.getElementById("canvasholder"),
+		onDraw: function(g) {
+			maingame.onDraw(g);
+		},
+		onKeyPress: function(g) {
+			maingame.onKeyPress(g);
+		}});
+		
 	  socket.on('receive-game', function(data) {
 		//log.innerHTML += '<li>Received: '+ JSON.stringify(data) +'</li>';
 		//var game =  JSON.parse(data);
-		newGame(data.world,data.player,socket);
+		newGame(data.world,data.player,socket,maingame);
 	});
 
   }
 
-  function newGame(worldData,player,socket) {
+  function newGame(worldData,player,socket,maingame) {
 	var startTime = Date.now();
 	var curEventIndex = 0; //world.isForward ? 0 : world.events.length-1;
 	// var eventsQueue = [];
@@ -46,32 +65,50 @@ function onLoad() {
 	
 	var curTime = getCurTime();
 	world.recordTankState(world.player,curTime);
-	
-	window.setInterval(function() {
+
+	function sendGameState() {
 		var curTime = getCurTime();
 		//recordTankState(player);
 		var eventQueues = world.getQueuedEvents(curTime);
 
 		socket.emit('tank-state', eventQueues,function() {});
 		world.flushQueuedEvents(curTime);
+	}
+	
+	var sendStateInterval = window.setInterval(function() {
+		sendGameState();
 
-	},10000)
+	},1000);
 
+	
+
+	function endLevel() {
+		maingame.onDraw = function() {};
+		maingame.onKeyPress = function(g) {};
+		clearInterval(sendStateInterval);	
+		maingame.endLevel();
+	}
+	maingame.onKeyPress = function(g) {
+		if (!!(g.keyCode==32)) world.player.fire();
+	}
 	var lastFrameTime= Date.now();
+	maingame.onDraw = function(g) {
 
-	var g = new Goo({width:800, height:600, 
-		container:document.getElementById("canvasholder"),
-		onDraw: function(g) {
+	
+	
 //			 if (Math.random()*10>1) return;
 			var curTime = getCurTime();
-
+			 if ((world.isForward && curTime>world.worldDuration) || (!world.isForward && curTime<0)) {
+			 		//sendGameState();
+			 		endLevel();
+			 	}
 			g.ctx.clearRect(0,0,g.width,g.height);
 			var datenow = Date.now();
 			var delta = (datenow - lastFrameTime) / 1000;
 			lastFrameTime = datenow;
 
 			world.player.handleKeys(g,curTime);
-			world.player.tick(g,delta);
+			world.player.tick(g,delta,world);
 			world.player.draw(g);
 
 			
@@ -100,14 +137,14 @@ function onLoad() {
 			});
 
 			Object.keys(world.otherTanks).forEach(function(p) {
-				world.otherTanks[p].tick(g,delta);
+				world.otherTanks[p].tick(g,delta,world);
 				world.otherTanks[p].draw(g);
 			});
 
 
 			updateTimer();
 		}
-	});
+	
 
 	function updateTimer() {
 		var t = getCurTime() / 1000;
@@ -131,18 +168,20 @@ function onLoad() {
 	this.keyReverse=false;
 	this.keyLeft=false;
 	this.keyRight=false;
+	this.keyShoot = false;
 	this.velocity = 0;
 	this.acceleration = 0;
 	this.lastState = null;
+	this.bullets = [];
   }
 
-  Tank.prototype.tick = function(g,delta) {
+  Tank.prototype.tick = function(g,delta,world) {
 
   	if (this.keyForward)
-  		this.acceleration = ACCELERATION; 
+  		this.acceleration = this.isForward ? ACCELERATION : -ACCELERATION; 
 		//this.speed = Math.min(MAX_FORWARD, this.speed+ ((0.4*60)*delta) );
 	  else if (this.keyReverse)
-	  	this.acceleration = -ACCELERATION;
+	  	this.acceleration = this.isForward ? -ACCELERATION : ACCELERATION;
 		//this.speed = Math.max(MAX_REVERSE, this.speed-((0.4*60)*delta));
 	  else
 	  {
@@ -157,18 +196,20 @@ function onLoad() {
 	if ((this.keyLeft && this.isForward) || (this.keyRight && !this.isForward))
 	{
 		this.angle = (this.angle - TURN_SPEED * delta) % 360;
-		this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
+		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
 		this.carImage = carLeft;
 	}
 	else if ((this.keyLeft && !this.isForward) || (this.keyRight && this.isForward))
 	{
 		this.angle = (this.angle + TURN_SPEED * delta) % 360;
-		this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
+		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
 		this.carImage = carRight;
 	}
 	else {
 		this.carImage = carStraight;
 	}
+
+
 
 	// 
 	if (this.acceleration) {
@@ -189,7 +230,8 @@ function onLoad() {
 
 	// move forward/backward
 	var x = 0;
-	var y = (this.isForward ? this.velocity : -this.velocity)*60*delta;
+	//var y = (this.isForward ? this.velocity : -this.velocity)*60*delta;
+	var y = this.velocity*60*delta;
 	
 	var angleRads = this.angle * (Math.PI / 180.0);
 	
@@ -221,10 +263,20 @@ function onLoad() {
 	}
 	
 	
+	this.bullets.forEach(function(b) { b.tick(delta,world); });
+	
+}
+
+Tank.prototype.fire = function( ) {
+
+	this.bullets.push(new Bullet(this.isForward,this,this.xpos,this.ypos,this.angle));
+	
 }
 
 Tank.prototype.setState = function(state) {
 	if (this.lastState && !this.isForward) {
+		this.velocity = -state.velocity;
+
 		this.angle = this.lastState.angle;
 		this.xpos = this.lastState.xpos;
 		this.ypos = this.lastState.ypos;
@@ -263,6 +315,8 @@ Tank.prototype.draw = function(g) {
 		
 	  g.ctx.restore();
 
+	  this.bullets.forEach(function(b) { b.draw(g); });
+
   };
 
   Tank.prototype.handleKeys = function(g,curTime) {
@@ -272,6 +326,7 @@ Tank.prototype.draw = function(g) {
 	  this.keyReverse = !!(g.keysDown[40] || g.keysDown[83] || g.keysDown[56]);
 	  this.keyLeft = !!(g.keysDown[37] || g.keysDown[65] || g.keysDown[52]);
 	  this.keyRight = !!(g.keysDown[39] || g.keysDown[68] || g.keysDown[54]);
+	  
 		var curKeyCombo = this.keyForward*2 + this.keyReverse*4 + this.keyLeft*8 + this.keyRight*16;	
 	  
 	
@@ -346,6 +401,64 @@ Token.prototype.compareTank = function(player,worldTime) {
 	}
 
 }
+
+function Bullet(isForward,tank,xpos,ypos,angle) {
+	this.isForward = isForward;
+	this.angle = angle;
+	this.tank = tank;
+	this.xpos = xpos;
+	this.ypos = ypos;
+	this.active = true;	
+}
+
+Bullet.prototype.tick = function(delta,world) {
+	if (this.active) {
+		for (var i =0; i<10; i++) {
+			var x= 0;
+			var y = 1*60*delta;
+			if (this.isForward) y=-y;
+
+			var angleRads = (180+this.angle) * (Math.PI / 180.0);
+			
+			var deltaX = x * Math.cos(angleRads) - y * Math.sin(angleRads)
+			var deltaY = x * Math.sin(angleRads) + y * Math.cos(angleRads)
+			
+			this.xpos += deltaX;
+			this.ypos += deltaY;
+
+			Object.keys(world.otherTanks).forEach(function(tankId) {
+				if (dist(world.otherTanks[tankId],this)<40) {
+					this.active=false;
+
+				}
+
+			}.bind(this));
+			
+		}
+	}
+
+}
+
+Bullet.prototype.draw = function(g) {
+	if (this.active) {
+		g.ctx.save();
+		g.ctx.translate(this.xpos, this.ypos);
+		
+			
+		g.ctx.fillStyle = "red";
+			
+		g.ctx.beginPath();
+		g.ctx.arc(10, 10, 10, 0, 2 * Math.PI, false);
+		g.ctx.stroke();
+		g.ctx.fill();
+			
+		  g.ctx.restore();
+		}
+
+}
+
+
+
 
 Token.prototype.toPlainObject = function() {
 
@@ -427,5 +540,7 @@ World.prototype.flushQueuedEvents = function(curTime) {
 		}.bind(this));
 	this.recordTankState(this.player,curTime);
 }
+
+
 
 onLoad();
