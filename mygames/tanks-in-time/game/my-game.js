@@ -44,6 +44,7 @@ function Player() {
   nextPlayerId++;
   this.world =  worlds[0];
   this.isForward = true;
+  this.events = [];
 }
 
 Player.prototype.newGame = function(socket) {
@@ -61,9 +62,19 @@ Player.prototype.newGame = function(socket) {
 }
 
 Player.prototype.receiveGameState = function (data) {
-    this.world.addEvents(data);
+    //this.world.addEvents(data);
+    
+    this.tank.addEvents(data.player);
+    //this.events.push.apply(this.events,data.player);
+    this.world.tokens.forEach(function(t) {
+      if (data.tokens[t.tokenId]) {
+        var events = data.tokens[t.tokenId];
+        t.addEvents(events);
+      }
+    });
     console.log("Received " + data.player.length + " rows");
 }
+
 
 function Tank(worldIndex,isForward) {
   this.tankId = nextTankId;
@@ -73,13 +84,20 @@ function Tank(worldIndex,isForward) {
   this.isForward = isForward;
 
   var world = worlds[this.worldIndex];
-  
+  this.events = [];
   
 }
 
 Tank.prototype.toPlainObject = function() {
-  return {tankId:this.tankId,isForward:this.isForward};
+  return {tankId:this.tankId,
+    isForward:this.isForward,
+    events:this.events};
 }
+
+
+Tank.prototype.addEvents = function (events) {
+  this.events.push.apply(this.events,events);
+};
 
 function Token(maxX,maxY) {
   this.xpos = Math.floor(Math.random()*maxX);
@@ -167,7 +185,7 @@ World.prototype.toPlainObject = function(isForward) {
   var f= {
     isForward:isForward,
     worldDuration:this.worldDuration,
-    events:events,
+    //events:events,
     players:this.tanks.map(function(p) {
       return p.toPlainObject();
     }),

@@ -111,28 +111,11 @@ function onLoad() {
 			lastFrameTime = datenow;
 
 			world.player.handleKeys(g,curTime);
-			world.player.tick(g,delta,world);
+			world.player.tick(g,delta,world,curTime);
 			world.player.draw(g);
 
 			
 			
-			if (world.isForward) {
-				while (curEventIndex < world.events.length && world.events[curEventIndex].startTime < curTime ) {
-					var curEvent = world.events[curEventIndex];
-					if (world.otherTanks[curEvent.tankId]) {
-						world.otherTanks[curEvent.tankId].setState(curEvent);
-					}
-					curEventIndex++;
-				}
-			} else {
-				while (curEventIndex < world.events.length && world.events[curEventIndex].endTime > curTime ) {
-					var curEvent = world.events[curEventIndex];
-					if (world.otherTanks[curEvent.tankId]) {
-						world.otherTanks[curEvent.tankId].setState(curEvent);
-					}
-					curEventIndex++;
-				}
-			}
 			Object.keys(world.tokens).forEach(function(t) {
 				world.tokens[t].compareTank(world.player,curTime);
 				world.tokens[t].tick(delta,curTime);
@@ -140,7 +123,7 @@ function onLoad() {
 			});
 
 			Object.keys(world.otherTanks).forEach(function(p) {
-				world.otherTanks[p].tick(g,delta,world);
+				world.otherTanks[p].tick(g,delta,world,curTime);
 				world.otherTanks[p].draw(g);
 			});
 
@@ -159,7 +142,7 @@ function onLoad() {
 
   }
 
-  function Tank(world,isForward,tankId) {
+  function Tank(world,isForward,tankId,tankData) {
 	this.angle = 0;
 	this.xpos = 400;
 	this.ypos = 200;
@@ -177,9 +160,46 @@ function onLoad() {
 	this.lastState = null;
 	this.bullets = [];
 	this.active = true;
+	this.events = tankData ? tankData.events : [];
+	if (world.isForward) {
+	    // forward sort by start time
+	    this.events.sort(function(a,b) { 
+	        if (a.startTime < b.startTime) return -1; else return 1;
+	    });
+	  } else {
+	    // reverse sort by end time
+	    this.events.sort(function(a,b) { 
+	        
+	        if (a.endTime > b.endTime) 
+	          return -1; 
+	        else if (a.endTime < b.endTime)
+	          return 1;
+	        else if (a.startTime > b.startTime )
+	          return -1;
+	        else 
+	          return 1;
+	        //return (b.endTime - a.endTime);
+	    });
+	  }
+	  this.curEventIndex = 0;
   }
 
-  Tank.prototype.tick = function(g,delta,world) {
+  Tank.prototype.tick = function(g,delta,world,curTime) {
+
+	if (this.world.isForward) {
+		while (this.curEventIndex < this.events.length && this.events[this.curEventIndex].startTime < curTime ) {
+			var curEvent = this.events[this.curEventIndex];
+			this.setState(curEvent);
+			this.curEventIndex++;
+		}
+	} else {
+		while (this.curEventIndex < this.events.length && this.events[this.curEventIndex].endTime > curTime ) {
+			var curEvent = this.events[this.curEventIndex];
+			this.setState(curEvent);
+			this.curEventIndex++;
+		}
+	}
+
 
   	if (this.keyForward)
   		this.acceleration = this.isForward ? ACCELERATION : -ACCELERATION; 
@@ -483,15 +503,16 @@ function dist(a,b) {
 }
 
 function World(worldData,player) {
-	this.events = worldData.events;	
+	//this.events = worldData.events;	
 	this.eventsQueue = [];
-	this.player = new Tank(this,true,player.tankId);
+	this.player = new Tank(this,true,player.tankId,false);
 	this.otherTanks = {};
 	this.tokens = {};
 	this.isForward = worldData.isForward;
 	this.worldDuration = worldData.worldDuration;
+
 	worldData.players.forEach(function(p) {
-		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward));
+		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward),p.tankId,p);
 	}.bind(this));
 	worldData.tokens.forEach(function(t) {
 		this.tokens[t.tokenId] = new Token(t,this.isForward);
