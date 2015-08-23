@@ -157,9 +157,9 @@ World.prototype.addEvents = function(data) {
 
 World.prototype.toPlainObject = function(isForward) {
   // sort events in correct order
-  debugger;  
+  /*
   var events = this.events.slice();
-  debugger;
+  
   if (isForward) {
     // forward sort by start time
     events.sort(function(a,b) { 
@@ -181,6 +181,7 @@ World.prototype.toPlainObject = function(isForward) {
         //return (b.endTime - a.endTime);
     });
   }
+  */
   debugger;
   var f= {
     isForward:isForward,
