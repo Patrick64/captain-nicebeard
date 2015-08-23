@@ -51,20 +51,20 @@ function onLoad() {
 	var curEventIndex = 0; //world.isForward ? 0 : world.events.length-1;
 	// var eventsQueue = [];
 	var timerElement = document.getElementById('worldTime');
-	var world = new World(worldData,player);
+	var world = new World(worldData,player,getCurTime());
 
 	function getCurTime() {
-		if (world.isForward) 
+		if (worldData.isForward) 
 			return Date.now() - startTime;
 		else
-			return (startTime + world.worldDuration) - Date.now();
+			return (startTime + worldData.worldDuration) - Date.now();
 	}
 
 	
 
 	
 	var curTime = getCurTime();
-	world.recordTankState(world.player,curTime);
+	world.player.recordTankState(world.player,curTime);
 
 	function sendGameState() {
 		var curTime = getCurTime();
@@ -87,12 +87,12 @@ function onLoad() {
 		maingame.onDraw = function() {};
 		maingame.onKeyPress = function(g) {};
 		clearInterval(sendStateInterval);	
-		world.recordTankState(world.player,curTime);
+		world.player.recordTankState(world.player,curTime);
 		sendGameState();
 		maingame.endLevel();
 	}
 	maingame.onKeyPress = function(g) {
-		if (!!(g.keyCode==32)) world.player.fire();
+		if (!!(g.keyCode==32)) world.player.fire(getCurTime());
 	}
 	var lastFrameTime= Date.now();
 	maingame.onDraw = function(g) {

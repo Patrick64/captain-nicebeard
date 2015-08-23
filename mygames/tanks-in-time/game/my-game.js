@@ -72,7 +72,7 @@ Player.prototype.receiveGameState = function (data) {
         t.addEvents(events);
       }
     });
-    console.log("Received " + data.player.length + " rows");
+    console.log("Received " + JSON.stringify(data) + " ");
 }
 
 
@@ -84,20 +84,23 @@ function Tank(worldIndex,isForward) {
   this.isForward = isForward;
 
   var world = worlds[this.worldIndex];
-  this.events = [];
+  this.events = {movements:[],gun:[],state:[]};
   
 }
 
 Tank.prototype.toPlainObject = function() {
   return {tankId:this.tankId,
     isForward:this.isForward,
-    events:{movements:this.events}
+    events:this.events
   };
 }
 
 
 Tank.prototype.addEvents = function (events) {
-  this.events.push.apply(this.events,events);
+  this.events.movements.push.apply(this.events.movements,events.movements);
+  this.events.gun.push.apply(this.events.gun,events.gun);
+  this.events.state.push.apply(this.events.state,events.state);
+  debugger;
 };
 
 function Token(maxX,maxY) {
@@ -134,6 +137,8 @@ Token.prototype.getEvents = function() {
 function World() {
  
  this.worldDuration=1*10*1000;
+ this.height = 600;
+ this.width = 800;
  this.events=[];
  this.tanks=[];
  this.tokens = [];
@@ -187,6 +192,9 @@ World.prototype.toPlainObject = function(isForward) {
   var f= {
     isForward:isForward,
     worldDuration:this.worldDuration,
+    height:this.height, 
+    width:this.width,
+
     //events:events,
     players:this.tanks.map(function(p) {
       return p.toPlainObject();

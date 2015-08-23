@@ -1,14 +1,15 @@
 'use strict';
 
-function GameEvent(events,isWorldForward) {
-	this.events = [];
-	if (events) this.addEvents(events);
+function GameEvents(events,isWorldForward) {
 	this.isWorldForward = isWorldForward;
 	this.curEventIndex=0;
+	this.events = [];
+	if (events) this.addEvents(events);
+	
 }
 
 /** call function for each event in worldTime */
-GameEvent.prototype.forEachCurrentEvent = function(worldTime,callback) {
+GameEvents.prototype.forEachCurrentEvent = function(worldTime,callback) {
 	if (this.isWorldForward) {
 		while (this.curEventIndex < this.events.length && (this.events[this.curEventIndex].worldTime < worldTime )) {
 			var curEvent = this.events[this.curEventIndex];
@@ -29,7 +30,7 @@ GameEvent.prototype.forEachCurrentEvent = function(worldTime,callback) {
 }
 
 // ge the next event to be run, useful for going in reverse
-GameEvent.prototype.getNextEvent = function() {
+GameEvents.prototype.getNextEvent = function() {
 	if (this.curEventIndex>0 && this.curEventIndex < this.events.length) {
 		return this.events[this.curEventIndex];
 	} else {
@@ -38,11 +39,12 @@ GameEvent.prototype.getNextEvent = function() {
 
 }
 
-GameEvent.prototype.addEvents  = function(events ) {
+GameEvents.prototype.addEvents  = function(events ) {
+	this.events = events;
 	if (this.isWorldForward) {
 	    // forward sort by start time
 	    this.events.sort(function(a,b) { 
-	        if (a.startTime < b.startTime) return -1; else return 1;
+	        if (a.worldTime < b.worldTime) return -1; else return 1;
 	    });
 	  } else {
 	    // reverse sort by end time

@@ -1,5 +1,6 @@
 
-  function Tank(world,isForward,tankId,tankData) {
+  function Tank(world,isForward,tankId,tankData,isPlayer,curTime) {
+  	this.isPlayer = isPlayer;
 	this.angle = 0;
 	this.xpos = 400;
 	this.ypos = 200;
@@ -17,8 +18,20 @@
 	this.lastState = null;
 	this.bullets = [];
 	this.active = true;
-	this.events = tankData ? tankData.events : {movements:[]};
-	
+	this.eventsQueue = {movements:[],gun:[],state:[]};
+
+	if (isPlayer) 
+		this.eventsQueue.state.push({worldTime:curTime,active:true,byTankId:null});
+
+
+	this.events = {
+		movements: tankData ? tankData.events.movements : [],
+		gun: tankData ? new GameEvents(tankData.events.gun,world.isForward) : new GameEvents([],world.isForward),
+		state:tankData ? new GameEvents(tankData.events.state,world.isForward) : new GameEvents([],world.isForward),
+	}
+	if (!this.isForward && this.events.state.getNextEvent() != null) {
+		this.active = this.events.state.getNextEvent().active;
+	}
 	if (world.isForward) {
 	    // forward sort by start time
 	    this.events.movements.sort(function(a,b) { 
@@ -145,15 +158,52 @@
 	}
 	
 	
-	this.bullets.forEach(function(b) { b.tick(delta,world); });
+		this.events.gun.forEachCurrentEvent(curTime,function(curEvent,prevEvent) {
+
+			if (this.isForward && curEvent.isFired) {
+				this.bullets.push(new Bullet(this.world.isForward,this,curEvent.startX,curEvent.startY,curEvent.angle,curTime,curEvent.startTime));
+			} else if (!this.isForward && !curEvent.isFired) {
+				this.bullets.push(new Bullet(this.world.isForward,this,curEvent.endX,curEvent.endY,curEvent.angle,curTime,curEvent.startTime));
+			}
+		}.bind(this));
+	
+	this.events.state.forEachCurrentEvent(curTime,function(curEvent,prevEvent) {
+		
+		if (this.isForward) {
+			this.active = curEvent.active;
+		} else if (!this.isForward && prevEvent) {
+			this.active = prevEvent.active;
+		}
+	}.bind(this));
+
+	this.bullets.forEach(function(b) { b.tick(delta,world,curTime); });
+	
+}	
+
+Tank.prototype.fire = function(curTime) {
+
+	this.bullets.push(new Bullet(this.isForward,this,this.xpos,this.ypos,this.angle,curTime,curTime));
+	this.eventsQueue.gun.push({
+		isFired:true,
+		worldTime: curTime,
+		startX:this.xpos,
+		startY:this.ypos,
+		startTime:curTime,
+		angle:this.angle
+	});
+}
+
+Tank.prototype.bulletHit = function(bullet,curTime) {
 	
 }
 
-Tank.prototype.fire = function( ) {
-
-	this.bullets.push(new Bullet(this.isForward,this,this.xpos,this.ypos,this.angle));
-	
+Tank.prototype.tankHit = function(bullet,curTime) {
+	this.active = false;	
+	// this tank is hit by a bullet
+	this.eventsQueue.state.push({worldTime:curTime,active:false,byTankId:bullet.tank.tankId});
 }
+
+
 
 Tank.prototype.setState = function(state) {
 	if (this.lastState && !this.isForward) {
@@ -182,7 +232,7 @@ Tank.prototype.setState = function(state) {
 }
 
 Tank.prototype.draw = function(g) {
-	if (this.active) {
+	//if (this.active) {
 		var angleRads = this.angle * (Math.PI / 180.0);
 		g.ctx.save();
 		g.ctx.translate(this.xpos, this.ypos);
@@ -192,14 +242,19 @@ Tank.prototype.draw = function(g) {
 		 if (this.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
 
 		  //g.ctx.fillStyle = 'rgb(' + Math.floor(255-42.5) + ',' +Math.floor(255-42.5) + ',0)';
-			g.ctx.fillRect(-25, -50, 50, 100);
+			if (this.active) 
+				g.ctx.fillRect(-25, -50, 50, 100);
+			else
+				g.ctx.strokeRect(-25, -50, 50, 100);
 			g.ctx.fillStyle = "grey";
 			g.ctx.fillRect(-5,0,10,50);
-			
+			g.ctx.strokeStyle = "rgb(255,200,100)";
+			g.ctx.lineWidth = 5;
+			if (this.isPlayer) g.ctx.strokeRect(-25, -50, 50, 100);
 		  g.ctx.restore();
 
 		  this.bullets.forEach(function(b) { b.draw(g); });
-	}
+	
   };
 
   Tank.prototype.handleKeys = function(g,curTime) {
@@ -215,13 +270,50 @@ Tank.prototype.draw = function(g) {
 	
 	
 	 if (curKeyCombo != lastKeyCombo)
-	 	this.world.recordTankState(this,curTime);
+	 	this.recordTankState(curTime);
 
 
 }
 
-Tank.prototype.hit = function(byTank) {
-	this.active = false;
+// Tank.prototype.hit = function(byTank) {
+// 	this.active = false;
+
+// }
+
+Tank.prototype.recordTankState = function(curTime) {
+	
+	// set startTime and endTime for last event
+	this.updateLastEventInQueue(curTime);
+	this.eventsQueue.movements.push(
+	{
+		tankId:this.tankId,
+		startTime: curTime,
+		endTime: curTime,
+		angle:this.angle,
+		xpos:this.xpos,
+		ypos:this.ypos,
+		//speed:this.speed,
+		keyForward:this.keyForward,
+		keyReverse:this.keyReverse,
+		keyLeft:this.keyLeft,
+		keyRight:this.keyRight,
+		velocity :this.velocity ,
+		acceleration :this.acceleration 
+	});
+}
+
+Tank.prototype.updateLastEventInQueue = function(curTime) {
+	
+	// set startTime and endTime for last event
+	if (this.eventsQueue.movements.length) {
+		var lastEvent = this.eventsQueue.movements[this.eventsQueue.movements.length-1];
+		lastEvent.startTime = Math.min(lastEvent.startTime,curTime);
+		lastEvent.endTime = Math.max(lastEvent.endTime,curTime);
+	}
 
 }
 
+Tank.prototype.flushQueuedEvents = function(curTime) {
+	this.eventsQueue = {movements:[],gun:[],state:[]};
+	this.recordTankState(curTime);
+}
