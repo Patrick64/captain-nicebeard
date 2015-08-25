@@ -2,8 +2,8 @@
   function Tank(world,isForward,tankId,tankData,isPlayer,curTime) {
   	this.isPlayer = isPlayer;
 	this.angle = 0;
-	this.xpos = 400;
-	this.ypos = 200;
+	this.xpos = world.width*Math.random();
+	this.ypos = world.height*Math.random();
 	this.tankId = tankId;
 	this.carImage = carStraight;
 	this.world = world;

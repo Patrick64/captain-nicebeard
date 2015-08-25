@@ -49,11 +49,14 @@ function Player() {
 
 Player.prototype.newGame = function(socket) {
   this.tank = new Tank(0,this.isForward);
-  this.world.addTank(this.tank);
+  
 
   var game = {player:this.tank.toPlainObject(),
     world:this.world.toPlainObject(this.isForward)
   };
+
+  this.world.addTank(this.tank);
+  
   //socket.on('disconnect', this.onExit.bind(this));
   debugger;
   socket.emit("receive-game",game);

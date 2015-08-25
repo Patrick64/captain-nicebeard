@@ -13,7 +13,7 @@ function Bullet(isForward,tank,xpos,ypos,angle,curTime,startTime) {
 
 Bullet.prototype.tick = function(delta,world,curTime) {
 	if (this.active) {
-		 
+		
 			for (var i =0; i<10; i++) {
 				var x= 0;
 				var y = 0.5*60*delta;
@@ -47,6 +47,13 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 			}
 		if (this.xpos<50 || this.ypos<50 || this.xpos > world.width-50 || this.ypos > world.height-50) {
 			this.disableBullet(curTime);
+		}
+		if (!this.tank.isForward) {
+			if (this.tank.world.isForward) {
+				if (curTime > this.startTime) this.disableBullet(curTime);
+			} else {
+				if (curTime < this.startTime) this.disableBullet(curTime);
+			}
 		}
 	}
 

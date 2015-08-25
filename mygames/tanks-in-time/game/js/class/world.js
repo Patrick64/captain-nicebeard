@@ -1,13 +1,13 @@
 function World(worldData,player,curTime) {
 	//this.events = worldData.events;	
-	
-	this.player = new Tank(this,true,player.tankId,false,true,curTime);
-	this.otherTanks = {};
-	this.tokens = {};
 	this.isForward = worldData.isForward;
 	this.worldDuration = worldData.worldDuration;
 	this.width = worldData.width;
 	this.height = worldData.height;
+	
+	this.player = new Tank(this,true,player.tankId,false,true,curTime);
+	this.otherTanks = {};
+	this.tokens = {};
 	worldData.players.forEach(function(p) {
 		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward),p.tankId,p,false,curTime);
 	}.bind(this));

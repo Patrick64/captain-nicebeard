@@ -64,7 +64,7 @@ function onLoad() {
 
 	
 	var curTime = getCurTime();
-	world.player.recordTankState(world.player,curTime);
+	world.player.recordTankState(curTime);
 
 	function sendGameState() {
 		var curTime = getCurTime();
@@ -87,7 +87,7 @@ function onLoad() {
 		maingame.onDraw = function() {};
 		maingame.onKeyPress = function(g) {};
 		clearInterval(sendStateInterval);	
-		world.player.recordTankState(world.player,curTime);
+		world.player.recordTankState(curTime);
 		sendGameState();
 		maingame.endLevel();
 	}
