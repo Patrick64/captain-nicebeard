@@ -45,7 +45,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 					}
 				}
 			}
-		if (this.xpos<50 || this.ypos<50 || this.xpos > world.width-50 || this.ypos > world.height-50) {
+		if (this.xpos<-50 || this.ypos<-50 || this.xpos > world.width+50 || this.ypos > world.height+50) {
 			this.disableBullet(curTime);
 		}
 		if (!this.tank.isForward) {

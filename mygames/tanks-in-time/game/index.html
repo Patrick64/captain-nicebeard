@@ -2,19 +2,37 @@
   <head>
     <title>My Game</title>
     <!-- The socket.io client lib is for free. ;-) -->
+    <style>
     
+    .noSmoothing {
+      image-rendering: optimizeSpeed;             
+
+      image-rendering: -moz-crisp-edges;          
+      image-rendering: -webkit-optimize-contrast; 
+      image-rendering: -o-crisp-edges;            
+      image-rendering: optimize-contrast;         
+      -ms-interpolation-mode: nearest-neighbor;   
+      image-rendering: pixelated;
+    }
+    .landscape-wrap { overflow:hidden;}
+    #landscape { border:solid 1px red; position:absolute;  }
+    #goocanvas { z-index:10; position: absolute; top: 0; left: 0;}
+    </style>
   </head>
   <body>
-    <h1>My Game</h1>
+    
     <p style="position:absolute; z-index:10; top:10px; right:10px; font-size:15px;" id="worldTime">
     </p>
-    <canvas id='display' width='1' height='1' > </canvas>
-    <div id="canvasholder" width="800" height="600"> </div>
+    <div class="landscape-wrap">
+      <canvas id='landscape' class="noSmoothing" > </canvas>
+    </div>
+    
 
     <ul id="log"></ul>
     <script src="socket.io/socket.io.js"></script>
-    <script src="js/goo.min.js"></script>
-    <script src="js/class/terrain.js"></script>
+    <script src="js/class/goo.js"></script>
+    <script src="js/class/perlin.js"></script>
+    <script src="js/class/landscape.js"></script>
     <script src="js/class/game-events.js"></script>
     <script src="js/class/world.js"></script>
     <script src="js/class/bullet.js"></script>

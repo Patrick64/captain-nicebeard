@@ -2,16 +2,16 @@ function Token(tokendata,isWorldForward) {
 	this.xpos = tokendata.xpos;
 	this.ypos = tokendata.ypos;
 	this.isWorldForward = isWorldForward;
-	this.events = tokendata.events;
+	this.events = new GameEvents(tokendata.events,isWorldForward);
 	this.eventsQueue = [];
-	if (this.isWorldForward) { // going forward
+	var firstEvent = this.events.getNextEvent();
+	if (firstEvent==null) 
 		this.visible = true;
-		this.events.sort(function(a,b) { return a.startTime - b.startTime; });
-	} else {
-		this.visible = false;
-		this.events.sort(function(a,b) { return b.startTime - a.startTime; });
+	else {
+		this.runEvent(firstEvent);
+		this.visible = !this.visible;
 	}
-	this.curEventIndex=0;
+	
 }
 
 Token.prototype.draw = function(g) {
@@ -33,29 +33,25 @@ Token.prototype.draw = function(g) {
 }
 
 Token.prototype.tick= function(delta,worldTime) {
-	if (this.isWorldForward) {
-		while (this.curEventIndex < this.events.length && (this.events[this.curEventIndex].startTime < worldTime )) {
-			var curEvent = this.events[this.curEventIndex];
-			this.visible = curEvent.isForward ? curEvent.visible : !curEvent.visible;
-			this.curEventIndex++;
-		}
-	} else {
-		while (this.curEventIndex < this.events.length && (this.events[this.curEventIndex].startTime > worldTime )) {
-			var curEvent = this.events[this.curEventIndex];
-			this.visible = curEvent.isForward ? !curEvent.visible : curEvent.visible;
-			this.curEventIndex++;
-		}
-	}
+	
+	this.events.forEachCurrentEvent(worldTime,function(event) {
+		this.runEvent(event);
+	}.bind(this));
+}
 
+Token.prototype.runEvent = function(event) {
+	if (this.isWorldForward)
+		this.visible = event.visible;
+	else
+		this.visible = !event.visible;
 }
 
 Token.prototype.compareTank = function(player,worldTime) {
 	if (dist(this,player)<50 && this.visible)	{
 		this.visible=false;
 		this.eventsQueue.push({
-			startTime: worldTime,
-			endTime: worldTime,
-			visible: this.visible,
+			worldTime: worldTime,
+			visible: this.isWorldForward ? this.visible : !this.visible,
 			tankId: player.tankId,
 			isForward: this.isWorldForward
 		});

@@ -2,8 +2,8 @@
   function Tank(world,isForward,tankId,tankData,isPlayer,curTime) {
   	this.isPlayer = isPlayer;
 	this.angle = 0;
-	this.xpos = world.width*Math.random();
-	this.ypos = world.height*Math.random();
+	this.xpos = (world.width*Math.random()*0.8)+200;
+	this.ypos = (world.height*Math.random()*0.8)+200;
 	this.tankId = tankId;
 	this.carImage = carStraight;
 	this.world = world;
@@ -20,8 +20,8 @@
 	this.active = true;
 	this.eventsQueue = {movements:[],gun:[],state:[]};
 
-	if (isPlayer) 
-		this.eventsQueue.state.push({worldTime:curTime,active:true,byTankId:null});
+	// if (isPlayer) 
+	// 	this.eventsQueue.state.push({worldTime:curTime,active:true,byTankId:null});
 
 
 	this.events = {
@@ -29,9 +29,17 @@
 		gun: tankData ? new GameEvents(tankData.events.gun,world.isForward) : new GameEvents([],world.isForward),
 		state:tankData ? new GameEvents(tankData.events.state,world.isForward) : new GameEvents([],world.isForward),
 	}
-	if (!this.isForward && this.events.state.getNextEvent() != null) {
-		this.active = this.events.state.getNextEvent().active;
+	var firstState = this.events.state.getNextEvent();
+	if (firstState!=null) {
+		this.active = firstState.active;
+		// if ()
+		// if (world.isForward) {
+		// 	if (firstState.active) 
+		// }
 	}
+	// if (!this.isForward && this.events.state.getNextEvent() != null) {
+	// 	this.active = this.events.state.getNextEvent().active;
+	// }
 	if (world.isForward) {
 	    // forward sort by start time
 	    this.events.movements.sort(function(a,b) { 
@@ -139,23 +147,23 @@
 	var carLength = 100;
 	this.wrapped = false;
 	
-	if (this.xpos < - carLength) {
-		this.xpos = g.width+carLength;  
-		this.wrapped = true;
-	}
-	else if (this.xpos >= g.width+carLength) {
-		this.xpos = -carLength;
-		this.wrapped = true;
-	}
+	// if (this.xpos < - carLength) {
+	// 	this.xpos = g.width+carLength;  
+	// 	this.wrapped = true;
+	// }
+	// else if (this.xpos >= g.width+carLength) {
+	// 	this.xpos = -carLength;
+	// 	this.wrapped = true;
+	// }
 	
-	if (this.ypos < -carLength) {
-		this.ypos = g.height+carLength;  
-		this.wrapped = true;
-	}
-	else if (this.ypos >= g.height+carLength) {
-		this.ypos = -carLength;
-		this.wrapped = true;
-	}
+	// if (this.ypos < -carLength) {
+	// 	this.ypos = g.height+carLength;  
+	// 	this.wrapped = true;
+	// }
+	// else if (this.ypos >= g.height+carLength) {
+	// 	this.ypos = -carLength;
+	// 	this.wrapped = true;
+	// }
 	
 	
 		this.events.gun.forEachCurrentEvent(curTime,function(curEvent,prevEvent) {
@@ -251,6 +259,12 @@ Tank.prototype.draw = function(g) {
 			g.ctx.strokeStyle = "rgb(255,200,100)";
 			g.ctx.lineWidth = 5;
 			if (this.isPlayer) g.ctx.strokeRect(-25, -50, 50, 100);
+		  g.ctx.restore();
+			g.ctx.save();
+			g.ctx.translate(this.xpos, this.ypos);
+			g.ctx.strokeStyle = "rgb(255,255,255)";
+			g.ctx.font = "15px serif";
+			g.ctx.strokeText(this.tankId,0,0);
 		  g.ctx.restore();
 
 		  this.bullets.forEach(function(b) { b.draw(g); });

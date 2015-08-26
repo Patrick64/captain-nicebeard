@@ -48,6 +48,10 @@ function Player() {
 }
 
 Player.prototype.newGame = function(socket) {
+  if (worlds[0].tanks.length>10) {
+    worlds[0].deleteWorld();
+    worlds[0]=getNewWorld();
+  }
   this.tank = new Tank(0,this.isForward);
   
 
@@ -140,14 +144,18 @@ Token.prototype.getEvents = function() {
 function World() {
  
  this.worldDuration=1*10*1000;
- this.height = 600;
+ this.height = 800;
  this.width = 800;
  this.events=[];
  this.tanks=[];
  this.tokens = [];
  for (var i=0;i<10;i++) {
-  this.tokens.push(new Token(800,600));
+  this.tokens.push(new Token(this.width,this.height));
  }
+}
+
+World.prototype.deleteWorld = function() {
+  this.tanks=[]; this.tokens=[];
 }
 
 World.prototype.addTank = function(tank) {

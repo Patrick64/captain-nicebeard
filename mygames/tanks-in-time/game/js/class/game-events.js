@@ -31,7 +31,7 @@ GameEvents.prototype.forEachCurrentEvent = function(worldTime,callback) {
 
 // ge the next event to be run, useful for going in reverse
 GameEvents.prototype.getNextEvent = function() {
-	if (this.curEventIndex>0 && this.curEventIndex < this.events.length) {
+	if (this.curEventIndex>=0 && this.curEventIndex < this.events.length) {
 		return this.events[this.curEventIndex];
 	} else {
 		return null;

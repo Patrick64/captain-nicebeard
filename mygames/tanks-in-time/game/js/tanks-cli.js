@@ -29,7 +29,8 @@ function onLoad() {
 	  	lastTank: null,
 	  	onKeyPress: function(key) {  	}
 	  }
-		var g = new Goo({width:800, height:600, 
+		var g = new Goo({
+		fullscreen:true,
 		container:document.getElementById("canvasholder"),
 		onDraw: function(g) {
 			maingame.onDraw(g);
@@ -52,15 +53,14 @@ function onLoad() {
 	// var eventsQueue = [];
 	var timerElement = document.getElementById('worldTime');
 	var world = new World(worldData,player,getCurTime());
-
+	world.renderLandscape();
+	var startTime = Date.now();
 	function getCurTime() {
 		if (worldData.isForward) 
 			return Date.now() - startTime;
 		else
 			return (startTime + worldData.worldDuration) - Date.now();
 	}
-
-	
 
 	
 	var curTime = getCurTime();
@@ -96,38 +96,17 @@ function onLoad() {
 	}
 	var lastFrameTime= Date.now();
 	maingame.onDraw = function(g) {
-
+		var curTime = getCurTime();
+		world.render(g,curTime);
 	
 	
 //			 if (Math.random()*10>1) return;
-			var curTime = getCurTime();
+			
 			 if ((world.isForward && curTime>world.worldDuration) || (!world.isForward && curTime<0)) {
 			 		//sendGameState();
 			 		endLevel();
 			 	}
-			g.ctx.clearRect(0,0,g.width,g.height);
-			var datenow = Date.now();
-			var delta = (datenow - lastFrameTime) / 1000;
-			lastFrameTime = datenow;
-
-			world.player.handleKeys(g,curTime);
-			world.player.tick(g,delta,world,curTime);
-			world.player.draw(g);
-
-			
-			
-			Object.keys(world.tokens).forEach(function(t) {
-				world.tokens[t].compareTank(world.player,curTime);
-				world.tokens[t].tick(delta,curTime);
-				world.tokens[t].draw(g);
-			});
-
-			Object.keys(world.otherTanks).forEach(function(p) {
-				world.otherTanks[p].tick(g,delta,world,curTime);
-				world.otherTanks[p].draw(g);
-			});
-
-
+			 	
 			updateTimer();
 		}
 	
