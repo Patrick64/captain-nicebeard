@@ -64,7 +64,7 @@
   }
 
   Tank.prototype.tick = function(g,delta,world,curTime) {
-
+	
 	if (this.world.isForward) {
 		while (this.curEventIndex < this.events.movements.length && this.events.movements[this.curEventIndex].startTime < curTime ) {
 			var curEvent = this.events.movements[this.curEventIndex];
@@ -79,6 +79,7 @@
 		}
 	}
 
+	var newAngle = this.angle;
 
   	if (this.keyForward)
   		this.acceleration = this.isForward ? ACCELERATION : -ACCELERATION; 
@@ -98,13 +99,13 @@
 	// rotate/turn
 	if ((this.keyLeft && this.isForward) || (this.keyRight && !this.isForward))
 	{
-		this.angle = (this.angle - TURN_SPEED * delta) % 360;
+		newAngle = (this.angle - TURN_SPEED * delta) % 360;
 		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
 		this.carImage = carLeft;
 	}
 	else if ((this.keyLeft && !this.isForward) || (this.keyRight && this.isForward))
 	{
-		this.angle = (this.angle + TURN_SPEED * delta) % 360;
+		newAngle = (this.angle + TURN_SPEED * delta) % 360;
 		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
 		this.carImage = carRight;
 	}
@@ -140,10 +141,16 @@
 	
 	var deltaX = x * Math.cos(angleRads) - y * Math.sin(angleRads)
 	var deltaY = x * Math.sin(angleRads) + y * Math.cos(angleRads)
-	
-	this.xpos += deltaX;
-	this.ypos += deltaY;
-	
+	//var prevX = this.xpos, prevY = this.ypos;
+	//var prevTerrainType = this.world.landscape.getTerrainType(this.translatePosition(-10,-50));
+	this.tryMove(this.xpos+deltaX,this.ypos+deltaY,newAngle);
+	//this.xpos += deltaX;
+	//this.ypos += deltaY;
+	//var terrainType = this.world.landscape.getTerrainType(this.translatePosition(-10,-50));
+	//if (terrainType == 3 && prevTerrainType != 3) {
+	//	this.xpos = prevX;
+	//	this.ypos = prevY;
+	//}
 	var carLength = 100;
 	this.wrapped = false;
 	
@@ -187,6 +194,36 @@
 	this.bullets.forEach(function(b) { b.tick(delta,world,curTime); });
 	
 }	
+
+Tank.prototype.translatePosition = function (origin,translate,angle) {
+        var angleRads = angle * (Math.PI / 180.0);
+        var deltaX = translate.x * Math.cos(angleRads) - translate.y * Math.sin(angleRads)
+        var deltaY = translate.x * Math.sin(angleRads) + translate.y * Math.cos(angleRads)
+        return {x:origin.xpos+deltaX,y:origin.ypos+deltaY};
+}
+
+Tank.prototype.tryMove = function(x,y,angle) {
+	var bl = this.world.landscape.getTerrainType(this.translatePosition(this,{x:-10,y:-50},this.angle));
+	var br = this.world.landscape.getTerrainType(this.translatePosition(this,{x:10,y:-50},this.angle));
+	var tl = this.world.landscape.getTerrainType(this.translatePosition(this,{x:-10,y:50},this.angle));
+	var tr = this.world.landscape.getTerrainType(this.translatePosition(this,{x:10,y:50},this.angle));
+	var newPos = {xpos:x,ypos:y};
+        var bl2 = this.world.landscape.getTerrainType(this.translatePosition(newPos,{x:-10,y:-50},angle));
+        var br2 = this.world.landscape.getTerrainType(this.translatePosition(newPos,{x:10,y:-50},angle));
+        var tl2 = this.world.landscape.getTerrainType(this.translatePosition(newPos,{x:-10,y:50},angle));
+        var tr2 = this.world.landscape.getTerrainType(this.translatePosition(newPos,{x:10,y:50},angle));
+	var prev = (bl == 3 ? 1 : 0) + (br == 3 ? 1 : 0) + (tl == 3 ? 1 : 0) + (tr == 3 ? 1 : 0);
+	var thisCount = (bl2 == 3 ? 1 : 0) + (br2 == 3 ? 1 : 0) + (tl2 == 3 ? 1 : 0) + (tr2 == 3 ? 1 : 0);
+	if (thisCount <= prev) {
+		this.xpos = x;
+		this.ypos = y;
+		this.angle = angle;
+	}
+
+
+
+
+}
 
 Tank.prototype.fire = function(curTime) {
 

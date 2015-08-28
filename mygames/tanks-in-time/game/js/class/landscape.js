@@ -3,7 +3,8 @@ function Landscape(width,height,multiplier,seed) {
 	this.width = Math.floor(width/multiplier);
 	this.height = Math.floor(height/multiplier);
 	this.seed = 7;//seed;
-  this.canvas = document.getElementById('landscape');
+	this.canvas = document.getElementById('landscape');
+	this.mask = new Int32Array(this.width*this.height);
 }
 
 Landscape.prototype.render = function() {
@@ -44,18 +45,23 @@ Landscape.prototype.render = function() {
     //if (value<20 && value2<0.15) value = 21;
 
     var cell = (x + y * this.width) * 4;
+	var terrainType;
     if (value>100) {
+	terrainType = 3;
     	value -= Math.random()*20;
     	data[cell] = data[cell + 1] = data[cell + 2] = value;
     } else if (value>10) {
+	terrainType = 2;
       //value -= Math.random()*20;
        //data[cell] = 0; data[cell + 1] = 255-(value); data[cell + 2] = 0;
        var value2 = Math.abs(noise.perlin2(x / 20, y / 20));
        data[cell] = 0; data[cell + 1] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); data[cell + 2] = 0;
      } else {
+	terrainType = 1;
      	value -= Math.random()*20;
      	data[cell] = 0; data[cell + 1] = 0; data[cell + 2] = 155+value*5;
      }
+	this.mask[x + y * this.width] = terrainType;
  //   data[cell] += Math.max(0, (25 - value) * 8);
     data[cell + 3] = 255; // alpha.
   }
@@ -85,4 +91,8 @@ ctx.fillText('Rendered in ' + (end - start) + ' ms', this.canvas.width / 2, this
 Landscape.prototype.move = function(x,y) {
   this.canvas.style.left = -x;
   this.canvas.style.top = -y;
+}
+
+Landscape.prototype.getTerrainType = function(xy) {
+	return this.mask[Math.floor(xy.x/this.multiplier) + Math.floor(xy.y/this.multiplier) * this.width];
 }
