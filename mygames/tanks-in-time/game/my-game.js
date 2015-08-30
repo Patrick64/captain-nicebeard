@@ -45,18 +45,21 @@ function Player() {
   this.world =  worlds[0];
   this.isForward = true;
   this.events = [];
+	this.lastTank = null;
 }
 
 Player.prototype.newGame = function(socket) {
-  if (worlds[0].tanks.length>10) {
-    worlds[0].deleteWorld();
+  if (this.world.tanks.length>2) {
+    this.world.deleteWorld();
     worlds[0]=getNewWorld();
+	this.world = worlds[0];
   }
   this.tank = new Tank(0,this.isForward);
   
 
   var game = {player:this.tank.toPlainObject(),
-    world:this.world.toPlainObject(this.isForward)
+    world:this.world.toPlainObject(this.isForward),
+	lastTank:this.lastTank
   };
 
   this.world.addTank(this.tank);
@@ -64,7 +67,7 @@ Player.prototype.newGame = function(socket) {
   //socket.on('disconnect', this.onExit.bind(this));
   debugger;
   socket.emit("receive-game",game);
-
+  this.lastTank = this.tank;
 
 }
 
@@ -144,11 +147,12 @@ Token.prototype.getEvents = function() {
 function World() {
  
  this.worldDuration=1*10*1000;
- this.height = 800;
- this.width = 800;
+ this.height = 2000;
+ this.width = 3000;
  this.events=[];
  this.tanks=[];
  this.tokens = [];
+ this.landscapeSeed = Math.floor(Math.random()*10000);
  for (var i=0;i<10;i++) {
   this.tokens.push(new Token(this.width,this.height));
  }
@@ -205,7 +209,7 @@ World.prototype.toPlainObject = function(isForward) {
     worldDuration:this.worldDuration,
     height:this.height, 
     width:this.width,
-
+    landscapeSeed: this.landscapeSeed,
     //events:events,
     players:this.tanks.map(function(p) {
       return p.toPlainObject();

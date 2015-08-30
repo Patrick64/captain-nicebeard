@@ -2,7 +2,7 @@ function Landscape(width,height,multiplier,seed) {
 	this.multiplier = multiplier;
 	this.width = Math.floor(width/multiplier);
 	this.height = Math.floor(height/multiplier);
-	this.seed = 7;//seed;
+	this.seed = seed;
 	this.canvas = document.getElementById('landscape');
 	this.mask = new Int32Array(this.width*this.height);
 }

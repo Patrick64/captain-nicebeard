@@ -1,11 +1,10 @@
 
-  function Tank(world,isForward,tankId,tankData,isPlayer,curTime) {
+  function Tank(world,isForward,tankId,tankData,isPlayer,curTime,lastTank) {
   	this.isPlayer = isPlayer;
 	this.angle = 0;
-	this.xpos = (world.width*Math.random()*0.8)+200;
-	this.ypos = (world.height*Math.random()*0.8)+200;
+	this.xpos = lastTank ? lastTank.xpos : (world.width*Math.random()*0.8)+200;
+	this.ypos = lastTank ? lastTank.ypos : (world.height*Math.random()*0.8)+200;
 	this.tankId = tankId;
-	this.carImage = carStraight;
 	this.world = world;
 	this.isForward = isForward;
 	this.keyForward=false;
@@ -101,16 +100,13 @@
 	{
 		newAngle = (this.angle - TURN_SPEED * delta) % 360;
 		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
-		this.carImage = carLeft;
 	}
 	else if ((this.keyLeft && !this.isForward) || (this.keyRight && this.isForward))
 	{
 		newAngle = (this.angle + TURN_SPEED * delta) % 360;
 		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
-		this.carImage = carRight;
 	}
 	else {
-		this.carImage = carStraight;
 	}
 
 

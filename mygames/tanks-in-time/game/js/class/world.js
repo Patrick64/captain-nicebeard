@@ -1,11 +1,11 @@
-function World(worldData,player,curTime) {
+function World(worldData,player,curTime,lastTank) {
 	//this.events = worldData.events;	
 	this.isForward = worldData.isForward;
 	this.worldDuration = worldData.worldDuration;
 	this.width = worldData.width;
 	this.height = worldData.height;
 	
-	this.player = new Tank(this,true,player.tankId,false,true,curTime);
+	this.player = new Tank(this,true,player.tankId,false,true,curTime,lastTank);
 	this.otherTanks = {};
 	this.tokens = {};
 	worldData.players.forEach(function(p) {
@@ -14,7 +14,8 @@ function World(worldData,player,curTime) {
 	worldData.tokens.forEach(function(t) {
 		this.tokens[t.tokenId] = new Token(t,this.isForward);
 	}.bind(this));
-	this.landscape = new Landscape(this.width,this.height,2,Math.random()*1000);
+	this.landscapeSeed = worldData.landscapeSeed;
+	this.landscape = new Landscape(this.width,this.height,4,this.landscapeSeed);
 	this.cameraX = this.player.xpos;
 	this.cameraY = this.player.ypos;
 	this.screenWidth = document.getElementById('goocanvas').width;

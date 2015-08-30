@@ -5,13 +5,6 @@ var MAX_REVERSE = -3.0;
 var ACCELERATION = 10;
 var TURN_SPEED = 80;
 
-var carStraight = new Image();
-carStraight.src = "./res/car_straight.png";
-var carLeft = new Image();
-carLeft.src = "./res/car_left.png";
-var carRight = new Image();
-carRight.src = "./res/car_right.png";
-
 var counter = 1000;
 
 
@@ -42,17 +35,17 @@ function onLoad() {
 	  socket.on('receive-game', function(data) {
 		//log.innerHTML += '<li>Received: '+ JSON.stringify(data) +'</li>';
 		//var game =  JSON.parse(data);
-		newGame(data.world,data.player,socket,maingame);
+		newGame(data.world,data.player,socket,maingame,data.lastTank);
 	});
 
   }
 
-  function newGame(worldData,player,socket,maingame) {
+  function newGame(worldData,player,socket,maingame,lastTank) {
 	var startTime = Date.now();
 	var curEventIndex = 0; //world.isForward ? 0 : world.events.length-1;
 	// var eventsQueue = [];
 	var timerElement = document.getElementById('worldTime');
-	var world = new World(worldData,player,getCurTime());
+	var world = new World(worldData,player,getCurTime(),lastTank);
 	world.renderLandscape();
 	var startTime = Date.now();
 	function getCurTime() {
