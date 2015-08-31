@@ -1,9 +1,10 @@
 
   function Tank(world,isForward,tankId,tankData,isPlayer,curTime,lastTank) {
   	this.isPlayer = isPlayer;
+	this.tokenCount = tankData ? tankData.tokenCount : 0;
 	this.angle = 0;
-	this.xpos = lastTank ? lastTank.xpos : (world.width*Math.random()*0.8)+200;
-	this.ypos = lastTank ? lastTank.ypos : (world.height*Math.random()*0.8)+200;
+	this.xpos = (world.width*Math.random()*0.8)+20;
+	this.ypos = (world.height*Math.random()*0.8)+20;
 	this.tankId = tankId;
 	this.world = world;
 	this.isForward = isForward;

@@ -17,12 +17,14 @@
     .landscape-wrap { overflow:hidden;}
     #landscape { border:solid 1px red; position:absolute;  }
     #goocanvas { z-index:10; position: absolute; top: 0; left: 0;}
+	#token-count { position: absolute; z-index:10; top:10px; left: 10px; font-size:20px }
     </style>
   </head>
   <body>
     
     <p style="position:absolute; z-index:10; top:10px; right:10px; font-size:15px;" id="worldTime">
     </p>
+	<p id="token-count"></p>
     <div class="landscape-wrap">
       <canvas id='landscape' class="noSmoothing" > </canvas>
     </div>
