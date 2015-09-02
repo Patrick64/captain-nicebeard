@@ -17,14 +17,21 @@
     .landscape-wrap { overflow:hidden;}
     #landscape { border:solid 1px red; position:absolute;  }
     #goocanvas { z-index:10; position: absolute; top: 0; left: 0;}
-	#token-count { position: absolute; z-index:10; top:10px; left: 10px; font-size:20px }
+	
+  
+  .hud { position:absolute; z-index:10; top:10px; right:10px; font-size:25px; color:#fff;}
+  .hud > p { background:rgba(0,0,0,0.5); display: inline-block;; margin-right:10px; }
     </style>
   </head>
   <body>
-    
-    <p style="position:absolute; z-index:10; top:10px; right:10px; font-size:15px;" id="worldTime">
-    </p>
-	<p id="token-count"></p>
+    <div class="hud">
+      <p id="level" ></p>
+    <p style="" id="worldTime" ></p>
+	<p id="rescued" ></p>
+  <p id="score" ></p>
+  <p id="coins" ></p>
+  <p id="given" ></p>
+</div>
     <div class="landscape-wrap">
       <canvas id='landscape' class="noSmoothing" > </canvas>
     </div>
@@ -32,6 +39,7 @@
 
     <ul id="log"></ul>
     <script src="socket.io/socket.io.js"></script>
+    <script src="js/class/class.js"></script>
     <script src="js/class/goo.js"></script>
     <script src="js/class/perlin.js"></script>
     <script src="js/class/landscape.js"></script>
@@ -40,6 +48,7 @@
     <script src="js/class/bullet.js"></script>
     <script src="js/class/tank.js"></script>
     <script src="js/class/token.js"></script>
+    <script src="js/class/floater.js"></script>
 
     <script src="js/tanks-cli.js"></script>
     <script>

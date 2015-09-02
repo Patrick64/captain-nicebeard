@@ -45,6 +45,12 @@ function onLoad() {
 	var curEventIndex = 0; //world.isForward ? 0 : world.events.length-1;
 	// var eventsQueue = [];
 	var timerElement = document.getElementById('worldTime');
+	var scoreElement = document.getElementById('score');
+	var coinsElement = document.getElementById('coins');
+	var levelElement = document.getElementById('level');
+	var givenElement = document.getElementById('given');
+	
+	var rescuedElement = document.getElementById('rescued');
 	var world = new World(worldData,player,getCurTime(),lastTank);
 	world.renderLandscape();
 	var startTime = Date.now();
@@ -59,12 +65,14 @@ function onLoad() {
 	var curTime = getCurTime();
 	world.player.recordTankState(curTime);
 
-	function sendGameState() {
+	function sendGameState(levelComplete) {
 		var curTime = getCurTime();
 		//recordTankState(player);
 		var eventQueues = world.getQueuedEvents(curTime);
 
-		socket.emit('tank-state', eventQueues,function() {});
+		socket.emit('tank-state',{
+			eventQueues: eventQueues,
+			levelComplete:levelComplete},function() {});
 		world.flushQueuedEvents(curTime);
 	}
 	
@@ -75,13 +83,13 @@ function onLoad() {
 
 	
 
-	function endLevel() {
+	function endLevel(levelComplete) {
 		var curTime = getCurTime();
 		maingame.onDraw = function() {};
 		maingame.onKeyPress = function(g) {};
 		clearInterval(sendStateInterval);	
 		world.player.recordTankState(curTime);
-		sendGameState();
+		sendGameState(levelComplete);
 		maingame.endLevel();
 	}
 	maingame.onKeyPress = function(g) {
@@ -97,8 +105,11 @@ function onLoad() {
 			
 			 if ((world.isForward && curTime>world.worldDuration) || (!world.isForward && curTime<0)) {
 			 		//sendGameState();
-			 		endLevel();
+			 		endLevel(false);
 			 	}
+			 if (world.player.rescuedFloaters>=2) {
+			 	endLevel(true);
+			 }
 			 	
 			updateTimer();
 		}
@@ -109,6 +120,12 @@ function onLoad() {
 		var m = Math.floor(t / 60);
 		var s = Math.floor(t % 60);
 		timerElement.innerHTML = m + ':' + (s<10 ? '0' : '') + s; 
+		scoreElement.innerHTML = "Score: " + world.player.score;
+		levelElement.innerHTML = "Lev " + (world.level+1);
+		coinsElement.innerHTML = "coins: " + world.player.coins;
+		givenElement.innerHTML = "given: " + world.player.given;
+		rescuedElement.innerHTML = "resued: "+ world.player.rescuedFloaters;
+
 	}
 
 

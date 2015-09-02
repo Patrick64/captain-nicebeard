@@ -19,6 +19,10 @@
 	this.bullets = [];
 	this.active = true;
 	this.eventsQueue = {movements:[],gun:[],state:[]};
+	this.score = 0;
+	this.coins= 0;
+	this.given = 0;
+	this.rescuedFloaters = 0;
 
 	// if (isPlayer) 
 	// 	this.eventsQueue.state.push({worldTime:curTime,active:true,byTankId:null});
@@ -81,33 +85,36 @@
 
 	var newAngle = this.angle;
 
-  	if (this.keyForward)
-  		this.acceleration = this.isForward ? ACCELERATION : -ACCELERATION; 
-		//this.speed = Math.min(MAX_FORWARD, this.speed+ ((0.4*60)*delta) );
-	  else if (this.keyReverse)
-	  	this.acceleration = this.isForward ? -ACCELERATION : ACCELERATION;
-		//this.speed = Math.max(MAX_REVERSE, this.speed-((0.4*60)*delta));
-	  else
-	  {
-		//this.speed *= 1-((0.02*60)*delta);
+  // 	if (this.keyForward)
+  // 		//this.acceleration = this.isForward ? ACCELERATION : -ACCELERATION; 
+		// //this.speed = Math.min(MAX_FORWARD, this.speed+ ((0.4*60)*delta) );
+	 //  else if (this.keyReverse)
+	 //  	//this.acceleration = this.isForward ? -ACCELERATION : ACCELERATION;
+		// //this.speed = Math.max(MAX_REVERSE, this.speed-((0.4*60)*delta));
+	 //  else
+	 //  {
+		// //this.speed *= 1-((0.02*60)*delta);
 		
-		this.acceleration = 0;
+		// //this.acceleration = 0;
 
-	  }
+	 //  }
 	  
-	  
+	
 	// rotate/turn
 	if ((this.keyLeft && this.isForward) || (this.keyRight && !this.isForward))
 	{
 		newAngle = (this.angle - TURN_SPEED * delta) % 360;
+		this.acceleration = ACCELERATION/50;  
 		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
 	}
 	else if ((this.keyLeft && !this.isForward) || (this.keyRight && this.isForward))
 	{
 		newAngle = (this.angle + TURN_SPEED * delta) % 360;
+		this.acceleration = ACCELERATION/50;  
 		//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
 	}
 	else {
+		this.acceleration = ACCELERATION/10;  
 	}
 
 
@@ -236,13 +243,14 @@ Tank.prototype.fire = function(curTime) {
 }
 
 Tank.prototype.bulletHit = function(bullet,curTime) {
-	
+	this.given++;
 }
 
 Tank.prototype.tankHit = function(bullet,curTime) {
 	this.active = false;	
 	// this tank is hit by a bullet
 	this.eventsQueue.state.push({worldTime:curTime,active:false,byTankId:bullet.tank.tankId});
+	this.coins++;
 }
 
 

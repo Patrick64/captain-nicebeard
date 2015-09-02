@@ -1,5 +1,5 @@
 var io = require('sandbox-io');
-
+var noise = require('./js/class/perlin.js');
 
 var worlds = [];
 var nextTankId = 1;
@@ -8,10 +8,10 @@ var nextPlayerId = 1;
 var players = [];
 
 
-worlds.push(getNewWorld());
+for (var i=0; i<10; i++) worlds.push(getNewWorld(i));
 
-function getNewWorld() {
-  return (new World());
+function getNewWorld(i) {
+  return (new World(i));
   //return {isForward:true,worldDuration:2*60*1000,events:[],players:[]};
 }
 
@@ -25,7 +25,7 @@ io.on('connection', function(socket) {
   var player = new Player();
   player.newGame(socket);
   socket.on('new-game', function(data) {
-    player.isForward = !player.isForward;
+    player.isForward = true; //!player.isForward;
     player.newGame(socket);
   });
 
@@ -45,15 +45,18 @@ function Player() {
   this.world =  worlds[0];
   this.isForward = true;
   this.events = [];
-	this.lastTank = null;
+//	this.lastTank = null;
+  this.level = 0;
 }
 
 Player.prototype.newGame = function(socket) {
-  if (this.world.tanks.length>2) {
+  this.world = worlds[this.level];
+  if (this.world.tanks.length>10) {
     this.world.deleteWorld();
-    worlds[0]=getNewWorld();
-	this.world = worlds[0];
+    worlds[this.level]=getNewWorld(this.level);
+	this.world = worlds[this.level];
   }
+  this.world.addTokens(10,10);
   this.tank = new Tank(0,this.isForward);
   
 
@@ -65,7 +68,7 @@ Player.prototype.newGame = function(socket) {
   this.world.addTank(this.tank);
   
   //socket.on('disconnect', this.onExit.bind(this));
-  debugger;
+  
   socket.emit("receive-game",game);
   this.lastTank = this.tank;
 
@@ -73,12 +76,19 @@ Player.prototype.newGame = function(socket) {
 
 Player.prototype.receiveGameState = function (data) {
     //this.world.addEvents(data);
-    
-    this.tank.addEvents(data.player);
+    debugger;
+    if (data.levelComplete) this.level++;
+    this.tank.addEvents(data.eventQueues.player);
     //this.events.push.apply(this.events,data.player);
     this.world.tokens.forEach(function(t) {
-      if (data.tokens[t.tokenId]) {
-        var events = data.tokens[t.tokenId];
+      if (data.eventQueues.tokens[t.tokenId]) {
+        var events = data.eventQueues.tokens[t.tokenId];
+        t.addEvents(events);
+      }
+    });
+    this.world.floaters.forEach(function(t) {
+      if (data.eventQueues.floaters[t.id]) {
+        var events = data.eventQueues.floaters[t.id];
         t.addEvents(events);
       }
     });
@@ -110,12 +120,12 @@ Tank.prototype.addEvents = function (events) {
   this.events.movements.push.apply(this.events.movements,events.movements);
   this.events.gun.push.apply(this.events.gun,events.gun);
   this.events.state.push.apply(this.events.state,events.state);
-  debugger;
+  
 };
 
-function Token(maxX,maxY) {
-  this.xpos = Math.floor(Math.random()*maxX);
-  this.ypos = Math.floor(Math.random()*maxY);
+function Token(x,y) {
+  this.xpos = x;
+  this.ypos = y;
   this.tokenId = nextTokenId;
   this.events = [];
   nextTokenId++;
@@ -125,6 +135,7 @@ Token.prototype.toPlainObject = function() {
     xpos:this.xpos,
     ypos:this.ypos,
     tokenId:this.tokenId,
+    id:this.tokenId,
     events:this.getEvents()
   };
 }
@@ -144,18 +155,36 @@ Token.prototype.getEvents = function() {
   return this.events;
 }
 
-function World() {
+function World(level) {
  
- this.worldDuration=1*10*1000;
- this.height = 2000;
- this.width = 3000;
+ this.worldDuration=1*60*1000;
+ this.height = 2000 + Math.floor(Math.random()*2000);
+ this.width = 3000  + Math.floor(Math.random()*2000);
  this.events=[];
  this.tanks=[];
  this.tokens = [];
+ this.floaters = [];
  this.landscapeSeed = Math.floor(Math.random()*10000);
- for (var i=0;i<10;i++) {
-  this.tokens.push(new Token(this.width,this.height));
- }
+ this.level = level;
+}
+
+World.prototype.addTokens = function(numTokens,numFloaters) {
+    noise.seed(this.landscapeSeed);
+    var tokensCount=0, floatersCount = 0;
+    while (tokensCount<numTokens || floatersCount < numFloaters) {
+      var x= Math.floor(Math.random()*this.width);
+      var y= Math.floor(Math.random()*this.height);
+      var value = Math.abs(noise.perlin2(x / (600), y / (600)));
+      value *= 256;
+      if (value>70 && value<80 && tokensCount<numTokens) {
+        this.tokens.push(new Token(x,y));
+        tokensCount++;
+      }
+      if (value<40 && floatersCount < numFloaters) {
+        this.floaters.push(new Token(x,y));
+        floatersCount++;
+      }
+    }
 }
 
 World.prototype.deleteWorld = function() {
@@ -177,34 +206,9 @@ World.prototype.addEvents = function(data) {
 }
 
 World.prototype.toPlainObject = function(isForward) {
-  // sort events in correct order
-  /*
-  var events = this.events.slice();
   
-  if (isForward) {
-    // forward sort by start time
-    events.sort(function(a,b) { 
-        if (a.startTime < b.startTime) return -1; else return 1;
-        //return (a.startTime - b.startTime);
-    });
-  } else {
-    // reverse sort by end time
-    events.sort(function(a,b) { 
-        
-        if (a.endTime > b.endTime) 
-          return -1; 
-        else if (a.endTime < b.endTime)
-          return 1;
-        else if (a.startTime > b.startTime )
-          return -1;
-        else 
-          return 1;
-        //return (b.endTime - a.endTime);
-    });
-  }
-  */
-  debugger;
   var f= {
+    level:this.level,
     isForward:isForward,
     worldDuration:this.worldDuration,
     height:this.height, 
@@ -215,6 +219,9 @@ World.prototype.toPlainObject = function(isForward) {
       return p.toPlainObject();
     }),
     tokens: this.tokens.map(function(t) {
+      return t.toPlainObject();
+    }),
+    floaters: this.floaters.map(function(t) {
       return t.toPlainObject();
     })
   };

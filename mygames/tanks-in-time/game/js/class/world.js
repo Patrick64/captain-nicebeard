@@ -4,18 +4,22 @@ function World(worldData,player,curTime,lastTank) {
 	this.worldDuration = worldData.worldDuration;
 	this.width = worldData.width;
 	this.height = worldData.height;
-	
+	this.level = worldData.level;	
 	this.player = new Tank(this,true,player.tankId,false,true,curTime,lastTank);
 	this.otherTanks = {};
 	this.tokens = {};
+	this.floaters = {};
 	worldData.players.forEach(function(p) {
 		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward),p.tankId,p,false,curTime);
 	}.bind(this));
 	worldData.tokens.forEach(function(t) {
 		this.tokens[t.tokenId] = new Token(t,this.isForward);
 	}.bind(this));
+	worldData.floaters.forEach(function(t) {
+		this.floaters[t.id] = new Floater(t);
+	}.bind(this));
 	this.landscapeSeed = worldData.landscapeSeed;
-	this.landscape = new Landscape(this.width,this.height,4,this.landscapeSeed);
+	this.landscape = new Landscape(this.width,this.height,2,this.landscapeSeed);
 	this.cameraX = this.player.xpos;
 	this.cameraY = this.player.ypos;
 	this.screenWidth = document.getElementById('goocanvas').width;
@@ -57,6 +61,12 @@ World.prototype.render = function(g,curTime) {
 			this.tokens[t].draw(g);
 		}.bind(this));
 
+		Object.keys(this.floaters).forEach(function(t) {
+			this.floaters[t].compareTank(this.player,curTime);
+			this.floaters[t].tick(delta,curTime);
+			this.floaters[t].draw(g);
+		}.bind(this));
+
 		Object.keys(this.otherTanks).forEach(function(p) {
 			this.otherTanks[p].tick(g,delta,this,curTime);
 			this.otherTanks[p].draw(g);
@@ -73,7 +83,13 @@ World.prototype.getQueuedEvents = function(curTime) {
 			function(obj,tokenId) { 
 				obj[tokenId] = this.tokens[tokenId].eventsQueue;
 				return obj;
+			}.bind(this),{}),
+		floaters:Object.keys(this.floaters).reduce(
+			function(obj,id) { 
+				obj[id] = this.floaters[id].eventsQueue;
+				return obj;
 			}.bind(this),{})
+			
 	};
 }
 
@@ -83,7 +99,11 @@ World.prototype.flushQueuedEvents = function(curTime) {
 		function(id) { 
 			this.tokens[id].eventsQueue = []; 
 		}.bind(this));
-	
+	Object.keys(this.floaters).forEach(
+		function(id) { 
+			this.floaters[id].eventsQueue = []; 
+		}.bind(this));
+		
 }
 
 

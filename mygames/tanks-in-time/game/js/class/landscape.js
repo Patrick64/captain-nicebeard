@@ -7,6 +7,20 @@ function Landscape(width,height,multiplier,seed) {
 	this.mask = new Int32Array(this.width*this.height);
 }
 
+Landscape.prototype.findRandomPos = function(minValue,maxValue){
+	noise.seed(this.seed);
+	
+	do {
+		var x= Math.floor(Math.random()*this.width*this.multiplier);
+		var y= Math.floor(Math.random()*this.height*this.multiplier);
+		var value = Math.abs(noise.perlin2(x / (600), y / (600)));
+		value *= 256;
+		
+	} until (value>=minValue && value<= maxValue);
+	return {x:x,y:y};
+
+}
+
 Landscape.prototype.render = function() {
 
 
@@ -27,52 +41,67 @@ Landscape.prototype.render = function() {
 	var start = Date.now();
 	noise.seed(this.seed);
 	for (var x = 0; x < this.width; x++) {
-  //if (x % 100 == 0) {
-  //  noise.seed(Math.random());
-  //}
-  
-  for (var y = 0; y < this.height; y++) {
-    //var value = Math.abs(noise.perlin2(x / 100, y / 100));
-    //noise.seed(1);
-    var value = Math.abs(noise.perlin2(x / (600/this.multiplier), y / (600/this.multiplier)));
-    
-    //var value2 = Math.abs(noise.perlin2((x+500) / 300, (y+500) / 300));
-    // noise.seed(2);
-     //var value2 = Math.abs(noise.perlin2((x+20) / 100, (y+20) / 100));
-     // var value = (value1+value2)/2;
-     value *= 256;
+	//if (x % 100 == 0) {
+	//  noise.seed(Math.random());
+	//}
+	
+	for (var y = 0; y < this.height; y++) {
+		//var value = Math.abs(noise.perlin2(x / 100, y / 100));
+		//noise.seed(1);
+		var value = Math.abs(noise.perlin2(x / (600/this.multiplier), y / (600/this.multiplier)));
+		
+		//var value2 = Math.abs(noise.perlin2((x+500) / 300, (y+500) / 300));
+		// noise.seed(2);
+		 //var value2 = Math.abs(noise.perlin2((x+20) / 100, (y+20) / 100));
+		 // var value = (value1+value2)/2;
+		 value *= 256;
+		 var value2 = Math.abs(noise.perlin2(x / 20, y / 20));
+		//if (value<20 && value2<0.15) value = 21;
 
-    //if (value<20 && value2<0.15) value = 21;
+		var cell = (x + y * this.width) * 4;
+		var terrainType;
+		var rand = Math.random();
+		
+		terrainType = value>80 ? 3 : 2;
 
-    var cell = (x + y * this.width) * 4;
-	var terrainType;
-    if (value>100) {
-	terrainType = 3;
-    	value -= Math.random()*20;
-    	data[cell] = data[cell + 1] = data[cell + 2] = value;
-    } else if (value>10) {
-	terrainType = 2;
-      //value -= Math.random()*20;
-       //data[cell] = 0; data[cell + 1] = 255-(value); data[cell + 2] = 0;
-       var value2 = Math.abs(noise.perlin2(x / 20, y / 20));
-       data[cell] = 0; data[cell + 1] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); data[cell + 2] = 0;
-     } else {
-	terrainType = 1;
-     	value -= Math.random()*20;
-     	data[cell] = 0; data[cell + 1] = 0; data[cell + 2] = 155+value*5;
-     }
-	this.mask[x + y * this.width] = terrainType;
+		if (value>110-rand*10) {
+			// grass
+			
+			value -= rand*20;
+			data[cell] = 0;
+			data[cell + 1] = value;
+			data[cell + 2] = 0;
+			
+
+			
+		} else if (value>80 || Math.floor(value)==Math.floor(77-rand*3)) {
+			
+			//value -= Math.random()*20;
+			 //data[cell] = 0; data[cell + 1] = 255-(value); data[cell + 2] = 0;
+			 
+			 //data[cell] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); 
+			 data[cell] = 255-(Math.random()*10)-((value-80)); 
+			 data[cell + 1] = data[cell]; 
+			 data[cell + 2] = Math.max(0,255-(value-80)*30);
+			} else {
+				
+				value -= Math.random()*20;
+				data[cell] = 0; data[cell + 1] = 0; 
+//      data[cell + 2] = 155+value*5;
+data[cell + 2] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); 
+}
+this.mask[x + y * this.width] = terrainType;
  //   data[cell] += Math.max(0, (25 - value) * 8);
-    data[cell + 3] = 255; // alpha.
-  }
+		data[cell + 3] = 255; // alpha.
+	}
 }
 
 /* // Benchmark code.
 start = Date.now();
 for (var x = 0; x < 10000; x++) {
-  for (var y = 0; y < 10000; y++) {
-    noise.simplex2(x / 50, y/50);
-  }
+	for (var y = 0; y < 10000; y++) {
+		noise.simplex2(x / 50, y/50);
+	}
 }*/
 var end = Date.now();
 
@@ -89,8 +118,8 @@ ctx.fillText('Rendered in ' + (end - start) + ' ms', this.canvas.width / 2, this
 }
 
 Landscape.prototype.move = function(x,y) {
-  this.canvas.style.left = -x;
-  this.canvas.style.top = -y;
+	this.canvas.style.left = -x;
+	this.canvas.style.top = -y;
 }
 
 Landscape.prototype.getTerrainType = function(xy) {
