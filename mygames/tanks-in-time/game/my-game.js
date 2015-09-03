@@ -6,7 +6,8 @@ var nextTankId = 1;
 var nextTokenId = 1;
 var nextPlayerId = 1;
 var players = [];
-
+debugger;
+express.static.mime.define({'image/svg+xml': ['svg']});
 
 for (var i=0; i<10; i++) worlds.push(getNewWorld(i));
 

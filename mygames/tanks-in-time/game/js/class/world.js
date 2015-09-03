@@ -19,7 +19,7 @@ function World(worldData,player,curTime,lastTank) {
 		this.floaters[t.id] = new Floater(t);
 	}.bind(this));
 	this.landscapeSeed = worldData.landscapeSeed;
-	this.landscape = new Landscape(this.width,this.height,2,this.landscapeSeed);
+	this.landscape = new Landscape(this.width,this.height,4,this.landscapeSeed);
 	this.cameraX = this.player.xpos;
 	this.cameraY = this.player.ypos;
 	this.screenWidth = document.getElementById('goocanvas').width;
@@ -31,8 +31,10 @@ World.prototype.renderLandscape = function() {
 }
 
 World.prototype.render = function(g,curTime) {
-		this.cameraX = this.player.xpos - (this.screenWidth/2);
-		this.cameraY = this.player.ypos - (this.screenHeight/2);
+		this.cameraX = Math.max(0,this.player.xpos - (this.screenWidth/2));
+		this.cameraY = Math.max(0,this.player.ypos - (this.screenHeight/2));
+		this.cameraX = Math.min(this.cameraX,this.width - (this.screenWidth));
+		this.cameraY = Math.min(this.cameraY,this.height - (this.screenHeight));
 
 		// this.cameraX = Math.max(0,this.player.xpos - (this.screenWidth/2));
 		// this.cameraY = Math.max(0,this.player.ypos - (this.screenHeight/2));

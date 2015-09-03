@@ -16,7 +16,7 @@ Landscape.prototype.findRandomPos = function(minValue,maxValue){
 		var value = Math.abs(noise.perlin2(x / (600), y / (600)));
 		value *= 256;
 		
-	} until (value>=minValue && value<= maxValue);
+	} while (value<minValue || value> maxValue);
 	return {x:x,y:y};
 
 }
@@ -75,6 +75,7 @@ Landscape.prototype.render = function() {
 
 			
 		} else if (value>80 || Math.floor(value)==Math.floor(77-rand*3)) {
+			// sand
 			
 			//value -= Math.random()*20;
 			 //data[cell] = 0; data[cell + 1] = 255-(value); data[cell + 2] = 0;
@@ -82,18 +83,19 @@ Landscape.prototype.render = function() {
 			 //data[cell] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); 
 			 data[cell] = 255-(Math.random()*10)-((value-80)); 
 			 data[cell + 1] = data[cell]; 
-			 data[cell + 2] = Math.max(0,255-(value-80)*30);
-			} else {
+			 data[cell + 2] = Math.max(0,255-(value-80)*30)+-(value2*20);
+		} else {
+			// seas
 				
 				value -= Math.random()*20;
 				data[cell] = 0; data[cell + 1] = 0; 
-//      data[cell + 2] = 155+value*5;
-data[cell + 2] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); 
-}
-this.mask[x + y * this.width] = terrainType;
- //   data[cell] += Math.max(0, (25 - value) * 8);
-		data[cell + 3] = 255; // alpha.
-	}
+			
+			data[cell + 2] = 235-(value2*20)-(Math.random()*20)-Math.abs((value*0.6)-30); 
+			}
+			this.mask[x + y * this.width] = terrainType;
+			 //   data[cell] += Math.max(0, (25 - value) * 8);
+					data[cell + 3] = 255; // alpha.
+				}
 }
 
 /* // Benchmark code.
@@ -123,5 +125,9 @@ Landscape.prototype.move = function(x,y) {
 }
 
 Landscape.prototype.getTerrainType = function(xy) {
-	return this.mask[Math.floor(xy.x/this.multiplier) + Math.floor(xy.y/this.multiplier) * this.width];
+	if (xy.x>0 && xy.x<this.width*this.multiplier && xy.y>0 && xy.y < this.height*this.multiplier) {
+		return this.mask[Math.floor(xy.x/this.multiplier) + Math.floor(xy.y/this.multiplier) * this.width];
+	} else {
+		return 0;
+	}
 }

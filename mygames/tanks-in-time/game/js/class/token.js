@@ -1,3 +1,4 @@
+
 var Token = Class.extend({
 	init: function(tokendata,isWorldForward) {
 
@@ -21,14 +22,14 @@ var Token = Class.extend({
 		if (this.visible) {
 			g.ctx.save();
 			g.ctx.translate(this.xpos, this.ypos);
-
+    		g.ctx.drawImage(gameImages[0], -20, -20,20,20);
 			
-			g.ctx.fillStyle = "green";
+			// g.ctx.fillStyle = "green";
 			
-			g.ctx.beginPath();
-			g.ctx.arc(20, 20, 20, 0, 2 * Math.PI, false);
-			g.ctx.stroke();
-			g.ctx.fill();
+			// g.ctx.beginPath();
+			// g.ctx.arc(20, 20, 20, 0, 2 * Math.PI, false);
+			// g.ctx.stroke();
+			// g.ctx.fill();
 			
 			g.ctx.restore();
 		}

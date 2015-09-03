@@ -68,7 +68,7 @@
   }
 
   Tank.prototype.tick = function(g,delta,world,curTime) {
-	
+	if (this.active) {
 	if (this.world.isForward) {
 		while (this.curEventIndex < this.events.movements.length && this.events.movements[this.curEventIndex].startTime < curTime ) {
 			var curEvent = this.events.movements[this.curEventIndex];
@@ -136,6 +136,14 @@
 	if (this.velocity>MAX_FORWARD) this.velocity = MAX_FORWARD;
 	if (this.velocity<MAX_REVERSE) this.velocity = MAX_REVERSE;
 
+	this.angle = newAngle;
+	
+	if (this.xpos < - 50 || (this.xpos >= this.world.width+50) || 
+		(this.ypos < -50) || (this.ypos >= this.world.height+50)) {
+		this.angle = this.angle+180;
+		
+	}
+
 	// move forward/backward
 	var x = 0;
 	//var y = (this.isForward ? this.velocity : -this.velocity)*60*delta;
@@ -147,7 +155,15 @@
 	var deltaY = x * Math.sin(angleRads) + y * Math.cos(angleRads)
 	//var prevX = this.xpos, prevY = this.ypos;
 	//var prevTerrainType = this.world.landscape.getTerrainType(this.translatePosition(-10,-50));
-	this.tryMove(this.xpos+deltaX,this.ypos+deltaY,newAngle);
+	//this.tryMove(this.xpos+deltaX,this.ypos+deltaY,newAngle);
+	this.xpos += deltaX;
+	this.ypos += deltaY;
+	
+	if (this.getTerrainType() == 3)
+	{
+		this.eventsQueue.state.push({worldTime:curTime,active:false,byTankId:null});
+		this.active = false;
+	}
 	//this.xpos += deltaX;
 	//this.ypos += deltaY;
 	//var terrainType = this.world.landscape.getTerrainType(this.translatePosition(-10,-50));
@@ -158,23 +174,7 @@
 	var carLength = 100;
 	this.wrapped = false;
 	
-	// if (this.xpos < - carLength) {
-	// 	this.xpos = g.width+carLength;  
-	// 	this.wrapped = true;
-	// }
-	// else if (this.xpos >= g.width+carLength) {
-	// 	this.xpos = -carLength;
-	// 	this.wrapped = true;
-	// }
 	
-	// if (this.ypos < -carLength) {
-	// 	this.ypos = g.height+carLength;  
-	// 	this.wrapped = true;
-	// }
-	// else if (this.ypos >= g.height+carLength) {
-	// 	this.ypos = -carLength;
-	// 	this.wrapped = true;
-	// }
 	
 	
 		this.events.gun.forEachCurrentEvent(curTime,function(curEvent,prevEvent) {
@@ -194,7 +194,7 @@
 			this.active = prevEvent.active;
 		}
 	}.bind(this));
-
+	}
 	this.bullets.forEach(function(b) { b.tick(delta,world,curTime); });
 	
 }	
@@ -211,6 +211,7 @@ Tank.prototype.tryMove = function(x,y,angle) {
 	var br = this.world.landscape.getTerrainType(this.translatePosition(this,{x:10,y:-50},this.angle));
 	var tl = this.world.landscape.getTerrainType(this.translatePosition(this,{x:-10,y:50},this.angle));
 	var tr = this.world.landscape.getTerrainType(this.translatePosition(this,{x:10,y:50},this.angle));
+
 	var newPos = {xpos:x,ypos:y};
         var bl2 = this.world.landscape.getTerrainType(this.translatePosition(newPos,{x:-10,y:-50},angle));
         var br2 = this.world.landscape.getTerrainType(this.translatePosition(newPos,{x:10,y:-50},angle));
@@ -227,6 +228,14 @@ Tank.prototype.tryMove = function(x,y,angle) {
 
 
 
+}
+
+Tank.prototype.getTerrainType = function() {
+	var bl = this.world.landscape.getTerrainType(this.translatePosition(this,{x:-10,y:-50},this.angle));
+	var br = this.world.landscape.getTerrainType(this.translatePosition(this,{x:10,y:-50},this.angle));
+	var tl = this.world.landscape.getTerrainType(this.translatePosition(this,{x:-10,y:50},this.angle));
+	var tr = this.world.landscape.getTerrainType(this.translatePosition(this,{x:10,y:50},this.angle));
+	return Math.max(bl,br,tl,tr);
 }
 
 Tank.prototype.fire = function(curTime) {
@@ -249,7 +258,7 @@ Tank.prototype.bulletHit = function(bullet,curTime) {
 Tank.prototype.tankHit = function(bullet,curTime) {
 	this.active = false;	
 	// this tank is hit by a bullet
-	this.eventsQueue.state.push({worldTime:curTime,active:false,byTankId:bullet.tank.tankId});
+//	this.eventsQueue.state.push({worldTime:curTime,active:false,byTankId:bullet.tank.tankId});
 	this.coins++;
 }
 

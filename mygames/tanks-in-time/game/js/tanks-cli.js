@@ -8,6 +8,8 @@ var TURN_SPEED = 80;
 var counter = 1000;
 
 
+	
+
 function onLoad() {
 	  // Connect to the server:
 	  var socket = io(document.location.href);
@@ -103,7 +105,7 @@ function onLoad() {
 	
 //			 if (Math.random()*10>1) return;
 			
-			 if ((world.isForward && curTime>world.worldDuration) || (!world.isForward && curTime<0)) {
+			 if ((world.isForward && curTime>world.worldDuration) || (!world.isForward && curTime<0) || !world.player.active) {
 			 		//sendGameState();
 			 		endLevel(false);
 			 	}
@@ -138,4 +140,20 @@ function dist(a,b) {
 }
 
 
-onLoad();
+//onLoad();
+
+var imgSrc = ["/img/chest.svg"];
+var imgsloaded= 0;
+var gameImages = imgSrc.map(function(src) { 
+	var img = new Image();
+	img.onerror = function(e) {
+		debugger;
+	}
+	img.onload = function() { 
+		imgsloaded++; 
+		if (imgsloaded==imgSrc.length) onLoad(); 
+	}; 
+	img.src = src;
+	return img;
+});
+
