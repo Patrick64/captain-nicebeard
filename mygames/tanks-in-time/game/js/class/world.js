@@ -60,18 +60,18 @@ World.prototype.render = function(g,curTime) {
 		Object.keys(this.tokens).forEach(function(t) {
 			this.tokens[t].compareTank(this.player,curTime);
 			this.tokens[t].tick(delta,curTime);
-			this.tokens[t].draw(g);
+			this.tokens[t].draw(g,curTime);
 		}.bind(this));
 
 		Object.keys(this.floaters).forEach(function(t) {
 			this.floaters[t].compareTank(this.player,curTime);
 			this.floaters[t].tick(delta,curTime);
-			this.floaters[t].draw(g);
+			this.floaters[t].draw(g,curTime);
 		}.bind(this));
 
 		Object.keys(this.otherTanks).forEach(function(p) {
 			this.otherTanks[p].tick(g,delta,this,curTime);
-			this.otherTanks[p].draw(g);
+			this.otherTanks[p].draw(g),curTime;
 		}.bind(this));
 
 		g.ctx.restore();
