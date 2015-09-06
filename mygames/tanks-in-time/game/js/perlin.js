@@ -25,10 +25,7 @@
     return this.x*x + this.y*y;
   };
 
-  Grad.prototype.dot3 = function(x, y, z) {
-    return this.x*x + this.y*y + this.z*z;
-  };
-
+  
   var grad3 = [new Grad(1,1,0),new Grad(-1,1,0),new Grad(1,-1,0),new Grad(-1,-1,0),
                new Grad(1,0,1),new Grad(-1,0,1),new Grad(1,0,-1),new Grad(-1,0,-1),
                new Grad(0,1,1),new Grad(0,-1,1),new Grad(0,1,-1),new Grad(0,-1,-1)];
@@ -88,8 +85,6 @@
   var F2 = 0.5*(Math.sqrt(3)-1);
   var G2 = (3-Math.sqrt(3))/6;
 
-  var F3 = 1/3;
-  var G3 = 1/6;
 
   
   // ##### Perlin noise stuff

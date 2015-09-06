@@ -1,12 +1,11 @@
 
 var Token = Class.extend({
-	init: function(tokendata,isWorldForward) {
+	init: function(tokendata) {
 
 
 		this.xpos = tokendata.xpos;
 		this.ypos = tokendata.ypos;
-		this.isWorldForward = isWorldForward;
-		this.events = new GameEvents(tokendata.events,isWorldForward);
+		this.events = new GameEvents(tokendata.events);
 		this.eventsQueue = [];
 		var firstEvent = this.events.getNextEvent();
 		if (firstEvent==null) 
@@ -46,10 +45,9 @@ var Token = Class.extend({
 	}
 
 	,runEvent: function(event) {
-		if (this.isWorldForward)
+		
 			this.visible = event.visible;
-		else
-			this.visible = !event.visible;
+		
 	}
 
 	,compareTank: function(player,worldTime) {
@@ -59,7 +57,7 @@ var Token = Class.extend({
 			
 			this.eventsQueue.push({
 				worldTime: worldTime,
-				visible: this.isWorldForward ? this.visible : !this.visible,
+				visible: this.visible,
 				tankId: player.tankId
 			});
 			this.tankHit(player,worldTime);

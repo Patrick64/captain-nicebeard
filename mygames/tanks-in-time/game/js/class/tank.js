@@ -96,19 +96,22 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 		}
 
 		// move forward/backward
-		var x = 0;
+		// 
+		var xy =this.translatePosition(this, {x:0,y:this.velocity * 60 * delta}, this.angle);
+		this.xpos = xy.x; this.ypos = xy.y;
+		// var x = 0;
 		
-		var y = this.velocity * 60 * delta;
+		// var y = this.velocity * 60 * delta;
 
-		var angleRads = this.angle * (Math.PI / 180.0);
+		// var angleRads = this.angle * (Math.PI / 180.0);
 
-		var deltaX = x * Math.cos(angleRads) - y * Math.sin(angleRads)
-		var deltaY = x * Math.sin(angleRads) + y * Math.cos(angleRads)
-			//var prevX = this.xpos, prevY = this.ypos;
-			//var prevTerrainType = this.world.landscape.getTerrainType(this.translatePosition(-10,-50));
-			//this.tryMove(this.xpos+deltaX,this.ypos+deltaY,newAngle);
-		this.xpos += deltaX;
-		this.ypos += deltaY;
+		// var deltaX = x * Math.cos(angleRads) - y * Math.sin(angleRads)
+		// var deltaY = x * Math.sin(angleRads) + y * Math.cos(angleRads)
+		// 	//var prevX = this.xpos, prevY = this.ypos;
+		// 	//var prevTerrainType = this.world.landscape.getTerrainType(this.translatePosition(-10,-50));
+		// 	//this.tryMove(this.xpos+deltaX,this.ypos+deltaY,newAngle);
+		// this.xpos += deltaX;
+		// this.ypos += deltaY;
 
 		if (this.getTerrainType() == 3) {
 			this.crash(null,curTime);

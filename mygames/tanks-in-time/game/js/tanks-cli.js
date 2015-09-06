@@ -1,11 +1,10 @@
 'use strict';
 
 var MAX_FORWARD = 3.0;
-var MAX_REVERSE = -3.0;
 var ACCELERATION = 10;
 var TURN_SPEED = 80;
 var RESCUE_GOAL = 10;
-var counter = 1000;
+
 
 
 var maingame = {
@@ -16,14 +15,11 @@ var maingame = {
 
 	},
 	level:0,
-	lastTank: null,
 	playerScore: 0,
-	landscape:false,
 	onKeyPress: function(key) {}
 }
 var g = new Goo({
 	fullscreen: true,
-	container: gid("canvasholder"),
 	onDraw: function(g) {
 		maingame.onDraw(g);
 	},

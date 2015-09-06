@@ -31,22 +31,7 @@ var Goo = function(o) {
   self.canvas.width = self.width;
   self.canvas.height = self.height;
 
-  if (self.__defineGetter__ && self.__defineSetter__) { 
-    self.__defineGetter__("width", function() {
-      return self.canvas.width;
-    });       
-    self.__defineSetter__("width", function(v) {
-      self.canvas.width = v;
-    });
-
-    self.__defineGetter__("height", function() {    
-      return self.canvas.height;
-    });       
-    self.__defineSetter__("height", function(v) {
-      self.canvas.height = v;
-    });
-  }
-  else if (Object.defineProperty) {  // Try the IE way
+  
     Object.defineProperty(self, "width", {
       get: function() {
         return self.canvas.width;
@@ -63,7 +48,7 @@ var Goo = function(o) {
         self.canvas.height = v;
       }
     });
-  }
+  
 
   if (self.fullscreen) {
     self.container = document.body;
@@ -92,82 +77,6 @@ var Goo = function(o) {
       return new Date().getTime();
     }
 
-  self.updateMouse = function(x, y) {
-    var self = this;
-    var obj = self.canvas;
-    while (obj) {
-      y -= obj.offsetTop;
-      x -= obj.offsetLeft;
-      obj = obj.offsetParent;
-    }    
-    self.prevMouseX = self.mouseX;
-    self.prevMouseY = self.mouseY;
-    self.mouseX = x;
-    self.mouseY = y;
-  }
-
-  document.addEventListener("mousedown", function(e) {
-      if (e.target == self.canvas) {
-        self.updateMouse(e.pageX, e.pageY);
-        if (self.onMouseDown)
-          self.onMouseDown(self);
-        self.dragging = true;
-      }
-    }, false);
-    
-  document.addEventListener("mouseup", function(e) {
-      if (self.dragging) {
-      self.updateMouse(e.pageX, e.pageY);
-      if (self.onMouseUp)
-        self.onMouseUp(self);
-      self.dragging = false;
-      }
-    }, false);
-    
-  document.addEventListener("mousemove", function(e) {
-      self.updateMouse(e.pageX, e.pageY);
-      if (self.mouseX != self.prevMouseX || self.mouseY != self.prevMouseY) {
-        if (self.dragging && self.onMouseDrag)
-          self.onMouseDrag(self);
-        else if (self.onMouseMove && e.target == self.canvas)
-          self.onMouseMove(self);
-      }
-    }, false);
-
-
-  document.addEventListener("touchstart", function(e) {
-      if (e.target == self.canvas) {
-        self.updateMouse(e.pageX, e.pageY);
-        if (self.onMouseDown)
-          self.onMouseDown(self);
-        self.dragging = true;
-      }
-    }, false);
-    
-  document.addEventListener("touchend", function(e) {
-      if (self.onMouseUp)
-        self.onMouseUp(self);
-      self.dragging = false;
-    }, false);
-          
-  document.addEventListener("touchmove", function(e) {
-      if (self.dragging)
-      {
-        self.updateMouse(e.pageX, e.pageY);
-        self.onMouseDrag(self);
-        e.preventDefault();
-      }
-      /* Doesn't really make sense
-      else if (self.onMouseMove && e.target == self.canvas)
-        self.onMouseMove(self);
-      */
-  }, false);
-    
-  document.addEventListener("click", function(e) {
-      self.updateMouse(e.pageX, e.pageY);
-      if (self.onMouseClick)
-        self.onMouseClick(self);
-    }, false);
           
   document.addEventListener("keydown", function(e) {
       self.keyCode = e.keyCode;

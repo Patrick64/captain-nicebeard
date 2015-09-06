@@ -66,16 +66,6 @@ Bullet.prototype.hitTank = function(otherTank,curTime) {
 
 Bullet.prototype.disableBullet = function(curTime) {
 	this.active = false;
-	this.tank.eventsQueue.gun.push({
-		isFired:false,
-		worldTime: curTime,
-		startX:this.startX,
-		startY:this.startY,
-		endX:this.xpos,
-		endY:this.ypos,
-		angle:this.angle,
-		startTime:this.startTime
-	});
 }
 Bullet.prototype.draw = function(g,worldtime) {
 	if (this.active) {
