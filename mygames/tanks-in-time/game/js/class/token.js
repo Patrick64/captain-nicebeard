@@ -69,6 +69,9 @@ var Token = Class.extend({
 	},
 	tankHit: function(player,worldTime) {
 		player.coins += 10;
+		if (player.isPlayer) {
+			showNotification("Booty retrieved. Press Z / X to give gold to fellow ships.");
+		}
 	}
 
 

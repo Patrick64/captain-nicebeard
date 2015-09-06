@@ -25,7 +25,15 @@ var Floater = Token.extend({
 	},
 	tankHit: function(player,worldTime) {
 		player.rescuedFloaters++;
-		
+		player.score += 10;
+		if (player.isPlayer) {
+			// var s = ["Walk the plank - aboard, shipmatey! ",
+			// "The more the merrier! ", 
+			// "Join us for a game of backgammon ",
+			// "Welcome aboard! "];
+			// showNotification(s[Math.floor(s.length*Math.random())] + (10-player.rescuedFloaters) + " to go!");		
+			showNotification("Shipmate rescued. " + (RESCUE_GOAL-player.rescuedFloaters) + " to go!");		
+		}
 
 	}
 })

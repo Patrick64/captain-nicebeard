@@ -11,7 +11,7 @@ function World(worldData,player,curTime,lastTank) {
 	this.tokens = {};
 	this.floaters = {};
 	this.landscapeSeed = worldData.landscapeSeed;
-	this.landscape = new Landscape(this.width,this.height,4,this.landscapeSeed,this.sealevel);
+	this.landscape = new Landscape(this.width,this.height,2,this.landscapeSeed,this.sealevel);
 	this.player = new Tank(this,true,player.tankId,false,true,curTime,lastTank);
 	worldData.players.forEach(function(p) {
 		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward),p.tankId,p,false,curTime);
@@ -26,6 +26,7 @@ function World(worldData,player,curTime,lastTank) {
 	this.cameraY = this.player.ypos;
 	this.screenWidth = document.getElementById('goocanvas').width;
 	this.screenHeight = document.getElementById('goocanvas').height;
+	this.timeNotify = false;
 }
 
 World.prototype.renderLandscape = function() {
@@ -37,6 +38,8 @@ World.prototype.render = function(g,curTime) {
 		this.cameraY = Math.max(0,this.player.ypos - (this.screenHeight/2));
 		this.cameraX = Math.min(this.cameraX,this.width - (this.screenWidth));
 		this.cameraY = Math.min(this.cameraY,this.height - (this.screenHeight));
+
+		
 
 		// this.cameraX = Math.max(0,this.player.xpos - (this.screenWidth/2));
 		// this.cameraY = Math.max(0,this.player.ypos - (this.screenHeight/2));
@@ -53,6 +56,10 @@ World.prototype.render = function(g,curTime) {
 		var delta = (datenow - this.lastFrameTime) / 1000;
 		this.lastFrameTime = datenow;
 
+		if (curTime > this.worldDuration*0.9 && !this.timeNotify) {
+			this.timeNotify = true;
+			showNotification('Time is running out!!');
+		}
 
 
 		

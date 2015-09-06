@@ -1,3 +1,5 @@
+
+
 function Landscape(width, height, multiplier, seed, sealevel) {
 	this.multiplier = multiplier;
 	this.width = Math.floor(width / multiplier);
@@ -119,9 +121,9 @@ Landscape.prototype.render = function() {
 	ctx.putImageData(image, 0, 0);
 
 
-	ctx.font = '16px sans-serif'
-	ctx.textAlign = 'center';
-	ctx.fillText('Rendered in ' + (end - start) + ' ms', this.canvas.width / 2, this.canvas.height - 20);
+	// ctx.font = '16px sans-serif'
+	// ctx.textAlign = 'center';
+	// ctx.fillText('Rendered in ' + (end - start) + ' ms', this.canvas.width / 2, this.canvas.height - 20);
 
 
 }

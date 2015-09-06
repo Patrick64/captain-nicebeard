@@ -30,7 +30,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 				if (this.tank.isForward) {
 					Object.keys(world.otherTanks).forEach(function(tankId) {
 						var otherTank = world.otherTanks[tankId];
-						if ( (dist(otherTank,this)<40 && otherTank.active) && (otherTank!=this) ) {
+						if ( (dist(otherTank,this)<50 && otherTank.active) && (otherTank!=this) ) {
 							
 							this.hitTank(otherTank,curTime);
 
@@ -64,7 +64,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 
 Bullet.prototype.hitTank = function(otherTank,curTime) {
 	this.disableBullet(curTime);
-	//this.tank.bulletHit(this,curTime);
+	this.tank.bulletHit(this,curTime);
 	
 	otherTank.tankHit(this,curTime);
 

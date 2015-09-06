@@ -7,14 +7,13 @@ var nextTokenId = 1;
 var nextPlayerId = 1;
 var players = [];
 var maxPlayersPerLevel = 20;
-var hiscore = db('hiscore') || {};
 debugger;
 
 
 
 function getNewWorld(i) {
   var w = new World(i);
-  w.addTokens(3 + (10 - i), 10 + (7 - i));
+  w.addTokens(5, 13 );
   return w;
   //return {isForward:true,worldDuration:2*60*1000,events:[],players:[]};
 }
@@ -55,16 +54,17 @@ function Player() {
   this.isForward = true;
   this.events = [];
   //	this.lastTank = null;
-  
+  this.landscapeChanged = true;
   this.playerName = "";
 }
 
 Player.prototype.newGame = function(socket) {
   this.world = worlds[this.level];
-  if (this.world.tanks.length > maxPlayersPerLevel) {
+  if (this.world.tanks.length > maxPlayersPerLevel + (this.level*2)) {
     this.world.deleteWorld();
     worlds[this.level] = getNewWorld(this.level);
     this.world = worlds[this.level];
+    this.landscapeChanged = true;
   }
 
   this.tank = new Tank(0, this.isForward, this);
@@ -74,7 +74,7 @@ Player.prototype.newGame = function(socket) {
     player: this.tank.toPlainObject(),
     world: this.world.toPlainObject(this.isForward),
     lastTank: this.lastTank,
-    hiscores: db('hiscore')
+    landscapeChanged:this.landscapeChanged
   };
 
 
@@ -90,17 +90,20 @@ Player.prototype.receiveGameState = function(data) {
   //this.world.addEvents(data);
   
   this.world.addTank(this.tank);
-  if (data.levelComplete) this.level++;
+  this.landscapeChanged = false;
+  if (data.levelComplete) {
+    this.level++;
+    this.landscapeChanged=true;
+  }
+  if (this.level>6) {
+    this.level=0;
+    this.landscapeChanged=true;
+  }
   if (data.player.playerName) {
     this.playerName = data.player.playerName;
     this.tank.playerName = data.player.playerName;
   }
   this.tank.addEvents(data.eventQueues.player);
-  
-  var hiscore = db('hiscore');
-  hiscore.push({playerName:this.tank.playerName,score:data.player.score});
-  hiscore.sort(function(a,b){return a.score-b.score});
-  db('hiscore',hiscore);
   //this.events.push.apply(this.events,data.player);
   this.world.tokens.forEach(function(t) {
     if (data.eventQueues.tokens[t.tokenId]) {
@@ -185,9 +188,9 @@ Token.prototype.getEvents = function() {
 
 function World(level) {
 
-  this.worldDuration = 1 * 60 * 1000;
-  this.height = 2000 + Math.floor(Math.random() * 200*this.level);
-  this.width = 2000 + Math.floor(Math.random() * 200*this.level);
+  this.worldDuration = 5 * 60 * 1000;
+  this.height = 2000 + 400*level;
+  this.width = 3000 +  400*level;
   this.events = [];
   this.tanks = [];
   this.tokens = [];

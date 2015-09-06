@@ -3,7 +3,7 @@
   <title>Captain Nicebeard</title>
   <!-- The socket.io client lib is for free. ;-) -->
 <style>
-body{ font-family: georgia, sans-serif;}
+html{ font-family: georgia, sans-serif; background: 0000C6;}
 .noSmoothing {
   image-rendering: optimizeSpeed;             
 
@@ -15,12 +15,12 @@ body{ font-family: georgia, sans-serif;}
   image-rendering: pixelated;
 }
 .landscape-wrap { overflow:hidden;}
-#landscape { border:solid 1px red; position:absolute;  }
+#landscape { position:absolute;  }
 #goocanvas { z-index:10; position: absolute; top: 0; left: 0;}
-
+#level, #rescued, #given {display: none}
 
 .hud { position:absolute; z-index:20; top:10px; right:10px; font-size:25px; color:#fff;}
-.hud > p { background:rgba(0,0,0,0.5); display: inline-block;; margin-right:10px; }
+.hud > p { background:rgba(0,0,0,0.5); display: inline-block;; margin-right:10px; padding:5px 10px;}
 #overlay {     position: relative;
     top: 50%;
     transform: translateY(-50%);
@@ -35,7 +35,10 @@ body{ font-family: georgia, sans-serif;}
     border-style: none solid;
     border-width: 15px;
     border-color: rgb(158, 125, 33);
+    opacity:0;
+    transition: all 1s;
 }
+#overlay.show { opacity:1;}
  #overlay h2, #overlay h3 { text-align: center;text-shadow: 0px 4px 4px #000; margin:0.2em;}
 #info b {
     display: inline-block;
@@ -58,7 +61,7 @@ body{ font-family: georgia, sans-serif;}
     display: block;}
     #info { display:none;}
     #newLevel { display:none;}
-    a{ color:inherit;}
+    a { text-decoration: none; color: rgb(100, 255, 234);}
     #notification-wrap {
       z-index:20;
       position:absolute; bottom:5%; width:100%; transition:all 1s; text-align: center;
@@ -76,6 +79,8 @@ body{ font-family: georgia, sans-serif;}
     #notification-wrap.show {}
     #notification-wrap.hide {bottom:-100px;}
     #press-space { display: none;}
+    #tweetthis { display:none;}
+    #tweetthis.show { display:block; }
 </style>
 </head>
 <body>
@@ -84,7 +89,7 @@ body{ font-family: georgia, sans-serif;}
     <canvas id='landscape' class="noSmoothing" > </canvas>
   </div>
 
-  <div id="overlay">
+  <div id="overlay" class="show">
     <div id="intro">
       <p>
         Yarr! I've plundered the seven seas but it has brought me no joy so I've left my pillaging days behind me to do right by giving back me ill gotten booty and rescuing those I made walk the plank - for I be now...
@@ -114,6 +119,11 @@ body{ font-family: georgia, sans-serif;}
       <h3 id="newLevTitle"></h3>
       <div id="statusInfo">
 
+      </div>
+      <div id="tweetthis">
+        <h3 id="finalscore"></h3>
+        <p><a href="#" target="_blank" id="twit">Post score on Twitter</a></p>
+        <hr/>
       </div>
       <h3>Captain Nicebeard the reverse pirate says:</h3>
       <p id="saying">Yarr! No rum for me thanks, I'm tee-total.</p>
@@ -149,21 +159,5 @@ body{ font-family: georgia, sans-serif;}
 
 
   <script src="js/tanks-cli.js"></script>
-  <script>
-
-/*      socket.on('srv-msg', function(data) {
-        log.innerHTML += '<li>Received: '+ JSON.stringify(data) +'</li>';
-      });
-
-      function send(data) {
-        log.innerHTML += '<li>Sending: '+ JSON.stringify(data) +'</li>';
-        socket.emit('cli-msg', data);
-      }
-      send('Hello');
-      send(42);
-      send(['aa', 'bb', 'cc']);
-      send({ aa:111, bb:222 }); */
-      </script>
-
     </body>
     </html>

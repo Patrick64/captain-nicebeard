@@ -31,7 +31,7 @@ function Tank(world, isForward, tankId, tankData, isPlayer, curTime, lastTank) {
 		gun: [],
 		state: []
 	};
-	this.score = 0;
+	this.score = tankData ? tankData.score : 0;
 	this.coins = 0;
 	this.given = 0;
 	this.rescuedFloaters = 0;
@@ -169,12 +169,8 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 		this.ypos += deltaY;
 
 		if (this.getTerrainType() == 3) {
-			this.eventsQueue.state.push({
-				worldTime: curTime,
-				active: false,
-				byTankId: null
-			});
-			this.active = false;
+			this.crash(null,curTime);
+			
 		}
 		//this.xpos += deltaX;
 		//this.ypos += deltaY;
@@ -205,12 +201,36 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 				this.active = prevEvent.active;
 			}
 		}.bind(this));
+
+		
+			
+		Object.keys(world.otherTanks).forEach(function(tankId) {
+			var otherTank = world.otherTanks[tankId];
+			if ( (dist(otherTank,this)<50 && otherTank.active) && (otherTank!=this) ) {
+				this.crash(otherTank,curTime);
+				otherTank.crash(this,curTime);
+			}
+		}.bind(this));
+
+		
+
 	}
 	this.bullets.forEach(function(b) {
 		b.tick(delta, world, curTime);
 	});
 
 }
+
+Tank.prototype.crash = function(otherTank,curTime) {
+	if (!this.isPlayer || curTime>2000) {
+		this.eventsQueue.state.push({
+			worldTime: curTime,
+			active: false,
+			byTankId: null
+		});
+		this.active = false;
+	}
+};
 
 Tank.prototype.translatePosition = function(origin, translate, angle) {
 	var angleRads = angle * (Math.PI / 180.0);
@@ -294,9 +314,9 @@ Tank.prototype.getTerrainType = function() {
 
 Tank.prototype.fire = function(curTime, direction) {
 	if (this.coins <= 0) {
-		if (this.isPlayer) showNotification('Yarr I be out of booty.');
+		if (this.isPlayer) showNotification('No coins left. Collect the treasure chests.');
 	} else {
-		var bulletAngle = this.angle + (90 * direction);
+		var bulletAngle = this.angle + (45 * direction);
 		this.bullets.push(new Bullet(this.isForward, this, this.xpos, this.ypos, bulletAngle, curTime, curTime));
 		this.eventsQueue.gun.push({
 			isFired: true,
@@ -357,6 +377,7 @@ Tank.prototype.draw = function(g, worldTime) {
 	var angleRads = this.angle * (Math.PI / 180.0);
 	g.ctx.save();
 	g.ctx.translate(this.xpos, this.ypos);
+	
 	g.ctx.rotate(angleRads);
 
 	//g.ctx.drawImage(this.carImage, -carStraight.width/2, -carStraight.height/2);
@@ -384,13 +405,25 @@ Tank.prototype.draw = function(g, worldTime) {
 		g.ctx.scale(0.6, -1);
 		g.ctx.globalAlpha = 0.5
 	}
+
+
+	if (this.isPlayer && worldTime<2000) {
+			g.ctx.beginPath();
+			g.ctx.strokeStyle= "rgba(128,255,128," + Math.abs(Math.sin(worldTime/200)) + ")";
+			// + (20*Math.sin(worldTime/200))
+			g.ctx.lineWidth = "10"
+			g.ctx.arc(5, -10, 70 , 0, 2 * Math.PI, false);
+			g.ctx.stroke();
+		}
+
 	g.ctx.drawImage(gameImages[2], 394 / 4 / 2, 371 / 4 / 4, -394 / 4, -371 / 4);
 	//if (this.isPlayer) g.ctx.strokeRect(-25, -50, 50, 100);
-	g.ctx.restore();
+	
 	if (!this.isPlayer) {
 
-
+		g.ctx.restore();
 		g.ctx.save();
+
 		g.ctx.translate(this.xpos, this.ypos);
 		g.ctx.strokeStyle = "rgb(255,255,255)";
 
@@ -402,8 +435,12 @@ Tank.prototype.draw = function(g, worldTime) {
 		g.ctx.fillStyle = "#fff";
 
 		g.ctx.fillText(this.playerName, -captionSize.width / 2, 55);
-		g.ctx.restore();
+		
+	} else {
+		
 	}
+
+	g.ctx.restore();
 
 	this.bullets.forEach(function(b) {
 		b.draw(g, worldTime);
