@@ -7,15 +7,13 @@ var nextTokenId = 1;
 var nextPlayerId = 1;
 var players = [];
 var maxPlayersPerLevel = 20;
-debugger;
-
 
 
 function getNewWorld(i) {
   var w = new World(i);
   w.addTokens(5, 13 );
   return w;
-  //return {isForward:true,worldDuration:2*60*1000,events:[],players:[]};
+
 }
 
 function startServer() {
@@ -31,7 +29,6 @@ function startServer() {
     var player = new Player();
     player.newGame(socket);
     socket.on('new-game', function(data) {
-      player.isForward = true; //!player.isForward;
       player.newGame(socket);
     });
 
@@ -51,7 +48,6 @@ function Player() {
   nextPlayerId++;
   this.level = 0;
   this.world = worlds[this.level];
-  this.isForward = true;
   this.events = [];
   //	this.lastTank = null;
   this.landscapeChanged = true;
@@ -67,19 +63,16 @@ Player.prototype.newGame = function(socket) {
     this.landscapeChanged = true;
   }
 
-  this.tank = new Tank(0, this.isForward, this);
+  this.tank = new Tank(0, this);
 
 
   var game = {
     player: this.tank.toPlainObject(),
-    world: this.world.toPlainObject(this.isForward),
+    world: this.world.toPlainObject(),
     lastTank: this.lastTank,
     landscapeChanged:this.landscapeChanged
   };
 
-
-
-  //socket.on('disconnect', this.onExit.bind(this));
 
   socket.emit("receive-game", game);
   this.lastTank = this.tank;
@@ -87,7 +80,6 @@ Player.prototype.newGame = function(socket) {
 }
 
 Player.prototype.receiveGameState = function(data) {
-  //this.world.addEvents(data);
   
   this.world.addTank(this.tank);
   this.landscapeChanged = false;
@@ -104,7 +96,6 @@ Player.prototype.receiveGameState = function(data) {
     this.tank.playerName = data.player.playerName;
   }
   this.tank.addEvents(data.eventQueues.player);
-  //this.events.push.apply(this.events,data.player);
   this.world.tokens.forEach(function(t) {
     if (data.eventQueues.tokens[t.tokenId]) {
       var events = data.eventQueues.tokens[t.tokenId];
@@ -117,16 +108,15 @@ Player.prototype.receiveGameState = function(data) {
       t.addEvents(events);
     }
   });
-  console.log("Received " + JSON.stringify(data) + " ");
 }
 
 
-function Tank(worldIndex, isForward, player) {
+function Tank(worldIndex, player) {
   this.tankId = nextTankId;
   nextTankId++;
   this.worldIndex = worldIndex;
 
-  this.isForward = isForward;
+  
 
   var world = worlds[this.worldIndex];
   this.events = {
@@ -140,7 +130,7 @@ function Tank(worldIndex, isForward, player) {
 Tank.prototype.toPlainObject = function() {
   return {
     tankId: this.tankId,
-    isForward: this.isForward,
+    
     events: this.events,
     playerName: this.playerName
   };
@@ -167,7 +157,7 @@ Token.prototype.toPlainObject = function() {
     ypos: this.ypos,
     tokenId: this.tokenId,
     id: this.tokenId,
-    events: this.getEvents()
+    events: this.events
   };
 }
 
@@ -175,16 +165,6 @@ Token.prototype.addEvents = function(events) {
   this.events.push.apply(this.events, events);
 }
 
-Token.prototype.getEvents = function() {
-  // var events = this.events.slice();
-  // events.sort(function(a,b) {
-  //     if (isForward)
-  //       return a.startTime - b.startTime;
-  //     else
-  //       return b.startTime - a.startTime;
-  // });
-  return this.events;
-}
 
 function World(level) {
 
@@ -240,17 +220,15 @@ World.prototype.addEvents = function(data) {
   });
 }
 
-World.prototype.toPlainObject = function(isForward) {
+World.prototype.toPlainObject = function() {
 
   var f = {
     sealevel: this.sealevel,
     level: this.level,
-    isForward: isForward,
     worldDuration: this.worldDuration,
     height: this.height,
     width: this.width,
     landscapeSeed: this.landscapeSeed,
-    //events:events,
     players: this.tanks.map(function(p) {
       return p.toPlainObject();
     }),

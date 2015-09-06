@@ -60,8 +60,7 @@ var Token = Class.extend({
 			this.eventsQueue.push({
 				worldTime: worldTime,
 				visible: this.isWorldForward ? this.visible : !this.visible,
-				tankId: player.tankId,
-				isForward: this.isWorldForward
+				tankId: player.tankId
 			});
 			this.tankHit(player,worldTime);
 		}

@@ -1,5 +1,5 @@
-function Bullet(isForward,tank,xpos,ypos,angle,curTime,startTime) {
-	this.isForward = isForward;
+function Bullet(tank,xpos,ypos,angle,curTime,startTime) {
+	
 	this.angle = angle;
 	this.tank = tank;
 	this.xpos = xpos;
@@ -17,7 +17,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 			for (var i =0; i<10; i++) {
 				var x= 0;
 				var y = 0.5*60*delta;
-				if (this.tank.isForward) y=-y;
+				y=-y;
 
 				var angleRads = (180+this.angle) * (Math.PI / 180.0);
 				
@@ -27,7 +27,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 				this.xpos += deltaX;
 				this.ypos += deltaY;
 
-				if (this.tank.isForward) {
+				
 					Object.keys(world.otherTanks).forEach(function(tankId) {
 						var otherTank = world.otherTanks[tankId];
 						if ( (dist(otherTank,this)<50 && otherTank.active) && (otherTank!=this) ) {
@@ -46,18 +46,12 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 					if (world.landscape.getTerrainType({x:this.xpos,y:this.ypos})==3) {
 						this.disableBullet(curTime);
 					}
-				}
+				
 			}
 		if (this.xpos<-50 || this.ypos<-50 || this.xpos > world.width+50 || this.ypos > world.height+50) {
 			this.disableBullet(curTime);
 		}
-		if (!this.tank.isForward) {
-			if (this.tank.world.isForward) {
-				if (curTime > this.startTime) this.disableBullet(curTime);
-			} else {
-				if (curTime < this.startTime) this.disableBullet(curTime);
-			}
-		}
+		
 	}
 
 }
@@ -89,8 +83,7 @@ Bullet.prototype.draw = function(g,worldtime) {
 		g.ctx.translate(this.xpos, this.ypos);
 		g.ctx.scale(1,0.2+(Math.cos((worldtime-this.startTime)/200)-0.2));
 			
-		//g.ctx.fillStyle = "red";
-		//if (this.tank.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
+
 		g.ctx.fillStyle = "#B88A0E"; 
 			
 		g.ctx.beginPath();

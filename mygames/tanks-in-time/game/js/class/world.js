@@ -1,6 +1,5 @@
 function World(worldData,player,curTime,lastTank) {
-	//this.events = worldData.events;	
-	this.isForward = worldData.isForward;
+	
 	this.worldDuration = worldData.worldDuration;
 	this.width = worldData.width;
 	this.height = worldData.height;
@@ -12,12 +11,12 @@ function World(worldData,player,curTime,lastTank) {
 	this.floaters = {};
 	this.landscapeSeed = worldData.landscapeSeed;
 	this.landscape = new Landscape(this.width,this.height,2,this.landscapeSeed,this.sealevel);
-	this.player = new Tank(this,true,player.tankId,false,true,curTime,lastTank);
+	this.player = new Tank(this,player.tankId,false,true,curTime,lastTank);
 	worldData.players.forEach(function(p) {
-		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward),p.tankId,p,false,curTime);
+		this.otherTanks[p.tankId] = new Tank(this,p.tankId,p,false,curTime);
 	}.bind(this));
 	worldData.tokens.forEach(function(t) {
-		this.tokens[t.tokenId] = new Token(t,this.isForward);
+		this.tokens[t.tokenId] = new Token(t);
 	}.bind(this));
 	worldData.floaters.forEach(function(t) {
 		this.floaters[t.id] = new Floater(t);
