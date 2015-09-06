@@ -43,6 +43,9 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 							this.hitTank(world.player,curTime);
 						}
 					}
+					if (world.landscape.getTerrainType({x:this.xpos,y:this.ypos})==3) {
+						this.disableBullet(curTime);
+					}
 				}
 			}
 		if (this.xpos<-50 || this.ypos<-50 || this.xpos > world.width+50 || this.ypos > world.height+50) {
@@ -80,19 +83,32 @@ Bullet.prototype.disableBullet = function(curTime) {
 		startTime:this.startTime
 	});
 }
-Bullet.prototype.draw = function(g) {
+Bullet.prototype.draw = function(g,worldtime) {
 	if (this.active) {
 		g.ctx.save();
 		g.ctx.translate(this.xpos, this.ypos);
-		
+		g.ctx.scale(1,0.2+(Math.cos((worldtime-this.startTime)/200)-0.2));
 			
 		//g.ctx.fillStyle = "red";
-		if (this.tank.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
+		//if (this.tank.isForward) g.ctx.fillStyle = "blue"; else g.ctx.fillStyle = "red";
+		g.ctx.fillStyle = "#B88A0E"; 
 			
 		g.ctx.beginPath();
+		g.ctx.strokeStyle= "#FDF1BF";
 		g.ctx.arc(10, 10, 10, 0, 2 * Math.PI, false);
 		g.ctx.stroke();
 		g.ctx.fill();
+
+		g.ctx.beginPath();
+		g.ctx.fillStyle= "#DC8D24";
+		g.ctx.arc(10-2, 10-2, 10, 0, 2 * Math.PI, false);
+		g.ctx.stroke();
+		g.ctx.fill();
+		
+		g.ctx.fillStyle= "#FFEEBA";
+		g.ctx.font = "20px serif";
+		g.ctx.fillText(String.fromCharCode(9733), 0, 15);
+		
 			
 		  g.ctx.restore();
 		}

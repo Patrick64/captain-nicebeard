@@ -5,10 +5,14 @@ function World(worldData,player,curTime,lastTank) {
 	this.width = worldData.width;
 	this.height = worldData.height;
 	this.level = worldData.level;	
-	this.player = new Tank(this,true,player.tankId,false,true,curTime,lastTank);
+	this.sealevel = worldData.sealevel;
+	
 	this.otherTanks = {};
 	this.tokens = {};
 	this.floaters = {};
+	this.landscapeSeed = worldData.landscapeSeed;
+	this.landscape = new Landscape(this.width,this.height,4,this.landscapeSeed,this.sealevel);
+	this.player = new Tank(this,true,player.tankId,false,true,curTime,lastTank);
 	worldData.players.forEach(function(p) {
 		this.otherTanks[p.tankId] = new Tank(this,(p.isForward == this.isForward),p.tankId,p,false,curTime);
 	}.bind(this));
@@ -18,8 +22,6 @@ function World(worldData,player,curTime,lastTank) {
 	worldData.floaters.forEach(function(t) {
 		this.floaters[t.id] = new Floater(t);
 	}.bind(this));
-	this.landscapeSeed = worldData.landscapeSeed;
-	this.landscape = new Landscape(this.width,this.height,4,this.landscapeSeed);
 	this.cameraX = this.player.xpos;
 	this.cameraY = this.player.ypos;
 	this.screenWidth = document.getElementById('goocanvas').width;
@@ -51,9 +53,7 @@ World.prototype.render = function(g,curTime) {
 		var delta = (datenow - this.lastFrameTime) / 1000;
 		this.lastFrameTime = datenow;
 
-		this.player.handleKeys(g,curTime);
-		this.player.tick(g,delta,this,curTime);
-		this.player.draw(g);
+
 
 		
 		
@@ -71,8 +71,12 @@ World.prototype.render = function(g,curTime) {
 
 		Object.keys(this.otherTanks).forEach(function(p) {
 			this.otherTanks[p].tick(g,delta,this,curTime);
-			this.otherTanks[p].draw(g),curTime;
+			this.otherTanks[p].draw(g,curTime);
 		}.bind(this));
+
+		this.player.handleKeys(g,curTime);
+		this.player.tick(g,delta,this,curTime);
+		this.player.draw(g,curTime);
 
 		g.ctx.restore();
 }
