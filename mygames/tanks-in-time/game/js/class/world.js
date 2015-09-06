@@ -105,17 +105,17 @@ World.prototype.getQueuedEvents = function(curTime) {
 	};
 }
 
-World.prototype.flushQueuedEvents = function(curTime) {
-	this.player.flushQueuedEvents(curTime);
-	Object.keys(this.tokens).forEach(
-		function(id) { 
-			this.tokens[id].eventsQueue = []; 
-		}.bind(this));
-	Object.keys(this.floaters).forEach(
-		function(id) { 
-			this.floaters[id].eventsQueue = []; 
-		}.bind(this));
+// World.prototype.flushQueuedEvents = function(curTime) {
+// 	this.player.flushQueuedEvents(curTime);
+// 	Object.keys(this.tokens).forEach(
+// 		function(id) { 
+// 			this.tokens[id].eventsQueue = []; 
+// 		}.bind(this));
+// 	Object.keys(this.floaters).forEach(
+// 		function(id) { 
+// 			this.floaters[id].eventsQueue = []; 
+// 		}.bind(this));
 		
-}
+// }
 
 

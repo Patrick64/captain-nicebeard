@@ -138,20 +138,20 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 		function sendGameState(levelComplete) {
 			var curTime = getCurTime();
 			//recordTankState(player);
-			var eventQueues = world.getQueuedEvents(curTime);
+			// var eventQueues = world.getQueuedEvents(curTime);
 
 			socket.emit('tank-state', {
-				eventQueues: eventQueues,
+				eventQueues: world.getQueuedEvents(curTime),
 				levelComplete: levelComplete,
 				player: world.player.toPlainObject()
-			}, function() {});
-			world.flushQueuedEvents(curTime);
+			});
+			// world.flushQueuedEvents(curTime);
 		}
 
-		var sendStateInterval = window.setInterval(function() {
-			//	sendGameState();
+		// var sendStateInterval = window.setInterval(function() {
+		// 	//	sendGameState();
 
-		}, 1000);
+		// }, 1000);
 
 
 
@@ -169,7 +169,7 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 			
 			maingame.onDraw = function() {};
 			maingame.onKeyPress = function(g) {};
-			clearInterval(sendStateInterval);
+			// clearInterval(sendStateInterval);
 			world.player.recordTankState(curTime);
 			
 			window.setTimeout(function() {
@@ -179,12 +179,14 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 			
 		}
 		maingame.onKeyPress = function(g) {
-			if (!!(g.keyCode == "z".charCodeAt(0) || g.keyCode == "Z".charCodeAt(0))) { // z
+			//if (!!(g.keyCode == "z".charCodeAt(0) || g.keyCode == "Z".charCodeAt(0))) { // z
+			if (g.keyCode == 122)
 				world.player.fire(getCurTime(),-1);
-			}
-			if (!!(g.keyCode == "x".charCodeAt(0) || g.keyCode == "X".charCodeAt(0))) { // x
+			
+			//if (!!(g.keyCode == "x".charCodeAt(0) || g.keyCode == "X".charCodeAt(0))) { // x
+			if (g.keyCode == 120) // x
 				world.player.fire(getCurTime(),1);
-			}
+			
 		}
 		var lastFrameTime = Date.now();
 		maingame.onDraw = function(g) {

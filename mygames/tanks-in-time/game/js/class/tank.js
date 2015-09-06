@@ -365,14 +365,14 @@ Tank.prototype.updateLastEventInQueue = function(curTime) {
 
 }
 
-Tank.prototype.flushQueuedEvents = function(curTime) {
-	this.eventsQueue = {
-		movements: [],
-		gun: [],
-		state: []
-	};
-	this.recordTankState(curTime);
-}
+// Tank.prototype.flushQueuedEvents = function(curTime) {
+// 	this.eventsQueue = {
+// 		movements: [],
+// 		gun: [],
+// 		state: []
+// 	};
+// 	this.recordTankState(curTime);
+// }
 Tank.prototype.toPlainObject = function() {
 	return {
 		active: this.active,

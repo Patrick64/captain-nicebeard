@@ -29,7 +29,7 @@
   var grad3 = [new Grad(1,1,0),new Grad(-1,1,0),new Grad(1,-1,0),new Grad(-1,-1,0),
                new Grad(1,0,1),new Grad(-1,0,1),new Grad(1,0,-1),new Grad(-1,0,-1),
                new Grad(0,1,1),new Grad(0,-1,1),new Grad(0,1,-1),new Grad(0,-1,-1)];
-
+//"MTUxoIlbWg+DDclfYDXC6QfhjCRnHkWOCGMl8BUKF74GlPd46ksAGsU+Xvzby3UjCyA5sSFY7ZU4V64UfYirqESvSqVHhoswG6ZNkp7nU2/lejzThebcaVwpNy71KPRmjzZBGT+hAdhQSdFMhLvQWRKpyMSHgnS8n1akZG3GrboDQDTZ4vp8ewXKJpN2fv9SVdTPzjvjLxA6Eba9HCrft6rVd/iYAiyao0bdmWWbpyusCYEWJ/0TYmxuT3Hg6LK5cGja9mHk+yLywe7SkAy/s6LxUTOR6/kO72sxwNYftcdqnbhUzLBzeTItfwSW/orszV3eckMdGEjzjYDDTkLXPZy0"
   var p = [151,160,137,91,90,15,
   131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
   190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -82,8 +82,8 @@
   }*/
 
   // Skewing and unskewing factors for 2, 3, and 4 dimensions
-  var F2 = 0.5*(Math.sqrt(3)-1);
-  var G2 = (3-Math.sqrt(3))/6;
+  // var F2 = 0.5*(Math.sqrt(3)-1);
+  // var G2 = (3-Math.sqrt(3))/6;
 
 
   
