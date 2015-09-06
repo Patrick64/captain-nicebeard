@@ -5,7 +5,7 @@ function Landscape(width, height, multiplier, seed, sealevel) {
 	this.width = Math.floor(width / multiplier);
 	this.height = Math.floor(height / multiplier);
 	this.seed = seed;
-	this.canvas = document.getElementById('landscape');
+	this.canvas = gid('landscape');
 	this.mask = new Int32Array(this.width * this.height);
 	this.sealevel = sealevel;
 }

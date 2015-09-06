@@ -1,5 +1,5 @@
 var io = require('sandbox-io');
-var noise = require('./js/class/perlin.js');
+var noise = require('./js/perlin.js');
 
 var worlds = [];
 var nextTankId = 1;

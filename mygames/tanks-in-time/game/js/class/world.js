@@ -23,8 +23,8 @@ function World(worldData,player,curTime,lastTank) {
 	}.bind(this));
 	this.cameraX = this.player.xpos;
 	this.cameraY = this.player.ypos;
-	this.screenWidth = document.getElementById('goocanvas').width;
-	this.screenHeight = document.getElementById('goocanvas').height;
+	this.screenWidth = gid('goocanvas').width;
+	this.screenHeight = gid('goocanvas').height;
 	this.timeNotify = false;
 }
 

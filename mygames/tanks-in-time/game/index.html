@@ -1,7 +1,6 @@
 <html>
 <head>
   <title>Captain Nicebeard</title>
-  <!-- The socket.io client lib is for free. ;-) -->
 <style>
 html{ font-family: georgia, sans-serif; background: 0000C6;}
 .noSmoothing {
@@ -17,7 +16,7 @@ html{ font-family: georgia, sans-serif; background: 0000C6;}
 .landscape-wrap { overflow:hidden;}
 #landscape { position:absolute;  }
 #goocanvas { z-index:10; position: absolute; top: 0; left: 0;}
-#level, #rescued, #given {display: none}
+
 
 .hud { position:absolute; z-index:20; top:10px; right:10px; font-size:25px; color:#fff;}
 .hud > p { background:rgba(0,0,0,0.5); display: inline-block;; margin-right:10px; padding:5px 10px;}
@@ -56,11 +55,9 @@ html{ font-family: georgia, sans-serif; background: 0000C6;}
     margin: 5px auto;
     font-size: 20px;}
 #intro form { text-align: center; display: block; margin:20px;}
-#intro p {}
 #intro label {    text-align: center;
     display: block;}
-    #info { display:none;}
-    #newLevel { display:none;}
+    
     a { text-decoration: none; color: rgb(100, 255, 234);}
     #notification-wrap {
       z-index:20;
@@ -75,10 +72,9 @@ html{ font-family: georgia, sans-serif; background: 0000C6;}
     border-color: rgb(158, 125, 33); margin:0 auto; padding:10px;
     display:inline-block;
     }
-    #notification-wrap.show {}
+    
     #notification-wrap.hide {bottom:-100px;}
-    #press-space { display: none;}
-    #tweetthis { display:none;}
+    #press-space, #tweetthis, #info, #newLevel  { display: none;}
     #tweetthis.show { display:block; }
 </style>
 </head>
