@@ -251,7 +251,7 @@ function showNotification(str) {
 
 //onLoad();
 
-var imgSrc = ["/img/chest.svg", "/img/floater.svg", "/img/ship.svg"];
+var imgSrc = ["/img/sprites.svg"];
 var imgsloaded = 0;
 var gameImages = imgSrc.map(function(src) {
 	var img = new Image();

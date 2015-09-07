@@ -11,7 +11,7 @@ var maxPlayersPerLevel = 20;
 
 function getNewWorld(i) {
   var w = new World(i);
-  w.addTokens(5, 13 );
+  w.addTokens(5, 15 );
   return w;
 
 }
@@ -82,6 +82,7 @@ Player.prototype.newGame = function(socket) {
 Player.prototype.receiveGameState = function(data) {
   
   this.world.addTank(this.tank);
+  this.world.addTokens(2, 5 );
   this.landscapeChanged = false;
   if (data.levelComplete) {
     this.level++;

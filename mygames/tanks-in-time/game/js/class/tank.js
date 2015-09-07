@@ -283,7 +283,7 @@ Tank.prototype.draw = function(g, worldTime) {
 			g.ctx.stroke();
 		}
 
-	g.ctx.drawImage(gameImages[2], 394 / 4 / 2, 371 / 4 / 4, -394 / 4, -371 / 4);
+	g.ctx.drawImage(gameImages[0],0,0,126,118, 394 / 4 / 2, 371 / 4 / 4, -394 / 4, -371 / 4);
 	//if (this.isPlayer) g.ctx.strokeRect(-25, -50, 50, 100);
 	
 	if (!this.isPlayer) {
