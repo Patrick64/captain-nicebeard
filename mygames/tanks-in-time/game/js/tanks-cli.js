@@ -14,6 +14,7 @@ var maingame = {
 		//socket.emit('new-game', {},function() {});
 
 	},
+	collidedWith:false,
 	level:0,
 	playerScore: 0,
 	onKeyPress: function(key) {}
@@ -42,9 +43,9 @@ function onLoad() {
 		gid('info').style.display = 'block';
 		maingame.onKeyPress = function(key) {
 			if (!!(g.keyCode == 32)) {
-				gid('info').style.display = 'none';
+				
 				//gid('overlay').style.display  = 'none';
-				gid('newLevel').style.display = 'block';
+				
 				startGame(gid('nameinput').value);
 			}
 		}
@@ -57,20 +58,30 @@ function onLoad() {
 function startGame(playerName) {
 	// Connect to the server:
 	var socket = io(document.location.href);
-	var prevLevel = -1;
-	maingame.endLevel = function(levelComplete,gameComplete) {
+	showLoading("Press space to start game!")
+
+	function showLoading(spaceText) {
+		gid('saying').innerText = pirateSayings[Math.floor(pirateSayings.length*Math.random())];	
 		gid('newLevel').style.display = 'block';
-		gid('overlay').className = 'show';
+		gid('info').style.display = 'none';
 		gid('press-space').style.display = 'none';
-		gid('press-space').innerHTML = gameComplete ? "Press space to restart game." : (levelComplete ? "Press space to travel to next sea." : "Press space to retry this sea.") ;
+		gid('overlay').className = 'show';
+		gid('press-space').innerText = spaceText;
 		gid('loading-text').style.display = 'block';
-		gid('saying').innerHTML = pirateSayings[Math.floor(pirateSayings.length*Math.random())];
+		
+	}
+	
+	maingame.endLevel = function(levelComplete,gameComplete) {
+		showLoading(gameComplete ? "Press space to restart game." : (levelComplete ? "Press space to travel to next sea." : "Press space to retry this sea."));
+		
 		if (!levelComplete || gameComplete) {
 			gid('finalscore').innerText = 
 			(gameComplete ? "CONGRATULATIONS! You have completed all seven seas. Your final score is " : "You scored ")
 			 + maingame.playerScore;	
 			if (gameComplete)
 				var status = "Shiver me timbers! I completed Captain Nicebeard and scored " + maingame.playerScore + ". Can you do better? " + window.location.href;
+			else if (maingame.collidedWith)
+				var status = "Avast! I scored " + maingame.playerScore + " and crashed into " + maingame.collidedWith + " on Captain Nicebeard! " + window.location.href;
 			else
 				var status = "Yarr! I scored " + maingame.playerScore + " on Captain Nicebeard, the reverse pirate! " + window.location.href;
 			var twit = "http://twitter.com/home/?status=" + encodeURIComponent(status);
@@ -80,15 +91,16 @@ function startGame(playerName) {
 		} else {
 			gid('tweetthis').className = '';
 		}
-		gid('loading-text').style.display = 'block';
 
 		if (!levelComplete || gameComplete) maingame.playerScore = 0;
-		socket.emit('new-game', {}, function() {});
+		maingame.collidedWith = false;
+		socket.emit('new-game', {});
 		
 	};
 	socket.on('receive-game', function(data) {
 		//log.innerHTML += '<li>Received: '+ JSON.stringify(data) +'</li>';
 		//var game =  JSON.parse(data);
+		
 		data.player.playerName = playerName;
 		data.player.score = maingame.playerScore;
 		newGame(data.world, data.player, socket, maingame, data.lastTank,playerName,data.landscapeChanged);
@@ -130,7 +142,7 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 
 	function startLoadedGame() {
 		startTime = Date.now();
-		showNotification("Sea number " + (world.level+1) + " ahoy!");
+		showNotification("Sea number " + (world.level+1) + " of 7 ahoy!");
 
 		var curTime = getCurTime();
 		world.player.recordTankState(curTime);
@@ -196,7 +208,6 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 
 
 			if (!world.player.active) {
-				showNotification("Yar! We be scuttled.");
 				endLevel(false);
 			}
 			if ((curTime > world.worldDuration)) {
@@ -217,10 +228,10 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 		var t =  (world.worldDuration - getCurTime()) / 1000;
 		var m = Math.floor(t / 60);
 		var s = Math.floor(t % 60);
-		timerElement.innerHTML = m + ':' + (s < 10 ? '0' : '') + s;
-		scoreElement.innerHTML = "Score: " + world.player.score;
+		timerElement.innerText = m + ':' + (s < 10 ? '0' : '') + s;
+		scoreElement.innerText = "Score: " + world.player.score;
 		
-		coinsElement.innerHTML = "Coins: " + world.player.coins;
+		coinsElement.innerText = "Coins: " + world.player.coins;
 		
 		
 
@@ -239,7 +250,7 @@ var hideNotification = false;
 function showNotification(str) {
 	var wrap = gid('notification-wrap');	
 	var notif = gid('notification');	
-	notif.innerHTML=str;
+	notif.innerText=str;
 	wrap.className = "show";
 	if (hideNotification) clearInterval(hideNotification);
 	hideNotification = window.setInterval(function() {
@@ -248,20 +259,6 @@ function showNotification(str) {
 }
 
 
-
-//onLoad();
-
-var imgSrc = ["/img/sprites.svg"];
-var imgsloaded = 0;
-var gameImages = imgSrc.map(function(src) {
-	var img = new Image();
-	img.onerror = function(e) {
-		debugger;
-	}
-	img.onload = function() {
-		imgsloaded++;
-		if (imgsloaded == imgSrc.length) onLoad();
-	};
-	img.src = src;
-	return img;
-});
+var sprite = new Image();
+sprite.src = "/img/sprites.svg";
+sprite.onload = onLoad;

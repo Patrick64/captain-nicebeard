@@ -161,13 +161,19 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 }
 
 Tank.prototype.crash = function(otherTank,curTime) {
-	if (!this.isPlayer || curTime>2000) {
+	if (!this.isPlayer || curTime>3000) {
 		this.eventsQueue.state.push({
 			worldTime: curTime,
 			active: false,
 			byTankId: null
 		});
 		this.active = false;
+		if (this.isPlayer && otherTank) {
+			maingame.collidedWith = otherTank.playerName;
+			showNotification('Shiver me timbers, we crashed into ' + otherTank.playerName);
+		} else if (this.isPlayer) {
+			showNotification("Yar! We be scuttled.");
+		}
 	}
 };
 
@@ -221,9 +227,10 @@ Tank.prototype.fire = function(curTime, direction) {
 	}
 }
 
-Tank.prototype.bulletHit = function(bullet, curTime) {
+Tank.prototype.bulletHit = function(bullet, curTime,otherTank) {
 	this.given++;
-	this.score += 10;
+	this.score += 30;
+	if (this.isPlayer) showNotification("Booty returned to " + otherTank.playerName);
 	bullet.disableBullet(curTime);
 }
 
@@ -252,8 +259,9 @@ Tank.prototype.setState = function(state) {
 	//this.acceleration = state.acceleration;
 }
 
-Tank.prototype.draw = function(g, worldTime) {
+Tank.prototype.draw = function(g, worldTime, world) {
 	//if (this.active) {
+	if (world.inView(this)) {
 	var angleRads = this.angle * (Math.PI / 180.0);
 	g.ctx.save();
 	g.ctx.translate(this.xpos, this.ypos);
@@ -274,7 +282,7 @@ Tank.prototype.draw = function(g, worldTime) {
 	}
 
 
-	if (this.isPlayer && worldTime<2000) {
+	if (this.isPlayer && worldTime<3000) {
 			g.ctx.beginPath();
 			g.ctx.strokeStyle= "rgba(128,255,128," + Math.abs(Math.sin(worldTime/200)) + ")";
 			// + (20*Math.sin(worldTime/200))
@@ -283,7 +291,7 @@ Tank.prototype.draw = function(g, worldTime) {
 			g.ctx.stroke();
 		}
 
-	g.ctx.drawImage(gameImages[0],0,0,126,118, 394 / 4 / 2, 371 / 4 / 4, -394 / 4, -371 / 4);
+	g.ctx.drawImage(sprite,0,0,126,118, 394 / 4 / 2, 371 / 4 / 4, -394 / 4, -371 / 4);
 	//if (this.isPlayer) g.ctx.strokeRect(-25, -50, 50, 100);
 	
 	if (!this.isPlayer) {
@@ -308,9 +316,9 @@ Tank.prototype.draw = function(g, worldTime) {
 	}
 
 	g.ctx.restore();
-
+}	
 	this.bullets.forEach(function(b) {
-		b.draw(g, worldTime);
+		b.draw(g, worldTime,world);
 	});
 
 };

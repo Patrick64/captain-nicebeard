@@ -66,25 +66,30 @@ World.prototype.render = function(g,curTime) {
 		Object.keys(this.tokens).forEach(function(t) {
 			this.tokens[t].compareTank(this.player,curTime);
 			this.tokens[t].tick(delta,curTime);
-			this.tokens[t].draw(g,curTime);
+			this.tokens[t].draw(g,curTime,this);
 		}.bind(this));
 
 		Object.keys(this.floaters).forEach(function(t) {
 			this.floaters[t].compareTank(this.player,curTime);
 			this.floaters[t].tick(delta,curTime);
-			this.floaters[t].draw(g,curTime);
+			this.floaters[t].draw(g,curTime,this);
 		}.bind(this));
 
 		Object.keys(this.otherTanks).forEach(function(p) {
 			this.otherTanks[p].tick(g,delta,this,curTime);
-			this.otherTanks[p].draw(g,curTime);
+			this.otherTanks[p].draw(g,curTime,this);
 		}.bind(this));
 
 		this.player.handleKeys(g,curTime);
 		this.player.tick(g,delta,this,curTime);
-		this.player.draw(g,curTime);
+		this.player.draw(g,curTime,this);
 
 		g.ctx.restore();
+}
+
+World.prototype.inView= function(xy) {
+	return (xy.xpos>this.cameraX-100 && xy.xpos<this.cameraX+this.screenWidth+100 &&
+		xy.ypos>this.cameraY-100 && xy.ypos<this.cameraY+this.screenHeight+100);
 }
 
 World.prototype.getQueuedEvents = function(curTime) {

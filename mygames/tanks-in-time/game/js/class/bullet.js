@@ -58,7 +58,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 
 Bullet.prototype.hitTank = function(otherTank,curTime) {
 	this.disableBullet(curTime);
-	this.tank.bulletHit(this,curTime);
+	this.tank.bulletHit(this,curTime,otherTank);
 	
 	otherTank.tankHit(this,curTime);
 
@@ -67,8 +67,8 @@ Bullet.prototype.hitTank = function(otherTank,curTime) {
 Bullet.prototype.disableBullet = function(curTime) {
 	this.active = false;
 }
-Bullet.prototype.draw = function(g,worldtime) {
-	if (this.active) {
+Bullet.prototype.draw = function(g,worldtime,world) {
+	if (this.active && world.inView(this)) {
 		g.ctx.save();
 		g.ctx.translate(this.xpos, this.ypos);
 		g.ctx.scale(1,0.2+(Math.cos((worldtime-this.startTime)/200)-0.2));

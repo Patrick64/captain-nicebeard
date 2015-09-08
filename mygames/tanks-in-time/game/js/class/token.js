@@ -17,13 +17,13 @@ var Token = Class.extend({
 
 	}
 
-	,draw: function(g,worldTime) {
-		if (this.visible) {
+	,draw: function(g,worldTime,world) {
+		if (this.visible && world.inView(this)) {
 			g.ctx.save();
 			g.ctx.translate(this.xpos, this.ypos);
 			var s =  (((worldTime+this.ypos*100)%1000 > 500) ? (500-((worldTime+this.ypos*100)%500)) : ((worldTime+this.ypos*100)%500))/1000;
 			g.ctx.scale(1+s,1+s*0.8);
-    		g.ctx.drawImage(gameImages[0],0,191,106,109, -331/8/2, -339/8/2,331/8, 339/8);
+    		g.ctx.drawImage(sprite,0,191,106,109, -331/8/2, -339/8/2,331/8, 339/8);
 			
 			// g.ctx.fillStyle = "green";
 			

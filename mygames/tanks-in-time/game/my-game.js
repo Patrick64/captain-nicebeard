@@ -56,7 +56,7 @@ function Player() {
 
 Player.prototype.newGame = function(socket) {
   this.world = worlds[this.level];
-  if (this.world.tanks.length > maxPlayersPerLevel + (this.level*2)) {
+  if (this.world.tanks.length > maxPlayersPerLevel ) {
     this.world.deleteWorld();
     worlds[this.level] = getNewWorld(this.level);
     this.world = worlds[this.level];

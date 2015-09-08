@@ -3,14 +3,14 @@ var Floater = Token.extend({
 		this._super(tokendata,false);
 	},
 
-	draw: function(g,worldTime) {
-		if (this.visible) {
+	draw: function(g,worldTime,world) {
+		if (this.visible && world.inView(this)) {
 			g.ctx.save();
 			g.ctx.translate(this.xpos, this.ypos);
 
 			var s =  (((worldTime+this.ypos*100)%1000 > 500) ? (500-((worldTime+this.ypos*100)%500)) : ((worldTime+this.ypos*100)%500))/500;
 			g.ctx.rotate(s-0.5);
-    		g.ctx.drawImage(gameImages[0],0,125,112,62, -351/6/2, -229/6/2,351/6, 229/6);
+    		g.ctx.drawImage(sprite,0,125,112,62, -351/6/2, -229/6/2,351/6, 229/6);
 
 			// g.ctx.fillStyle = "red";
 			
