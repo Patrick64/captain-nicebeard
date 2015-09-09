@@ -147,7 +147,15 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 
 	function startLoadedGame() {
 		st = Date.now();
-		showNotification("Sea number " + (world.level+1) + " of 7 ahoy!");
+		showNotification('The ' +
+			(world.level == 0 ? 'Black Sea' : '') +
+			(world.level == 1 ? 'Caspian Sea' : '') +
+			(world.level == 2 ? 'Red Sea' : '') +
+			(world.level == 3 ? 'Mediterranean Sea' : '') +
+			(world.level == 4 ? 'Persian Gulf' : '') +
+			(world.level == 5 ? 'Adriatic Sea' : '') +
+			(world.level == 6 ? 'Arabian Sea' : '') +
+			" (" + (world.level+1) + " of 7) ahoy!");
 
 		var curTime = getCurTime();
 		world.player.recordTankState(curTime);
