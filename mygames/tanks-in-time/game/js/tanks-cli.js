@@ -36,10 +36,10 @@ function gid(id) {
 
 
 function onLoad() {
-	gid('landscape-wrap').style.width=g.width + 'px';
-	gid('landscape-wrap').style.height=g.height + 'px';
+	gid('landscape-wrap').style.width=window.innerWidth + 'px';
+	gid('landscape-wrap').style.height=window.innerHeight + 'px';
 	
-	var l = new Landscape(g.width, g.height, 2, Math.random() * 2000,5);
+	var l = new Landscape(window.innerWidth, window.innerHeight, 2, Math.random() * 2000,5);
 	l.render();
 	gid('nameform').onsubmit = function(e) {
 		gid('intro').style.display = 'none';
@@ -206,7 +206,7 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 		}
 		maingame.onKeyPress = function(g) {
 			//if (!!(g.keyCode == "z".charCodeAt(0) || g.keyCode == "Z".charCodeAt(0))) { // z
-			if (g.keyCode == 122)
+			if (g.keyCode == 122 || g.keyCode == 119 || g.keyCode == 121)
 				world.player.fire(getCurTime(),-1);
 			
 			//if (!!(g.keyCode == "x".charCodeAt(0) || g.keyCode == "X".charCodeAt(0))) { // x

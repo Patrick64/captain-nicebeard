@@ -31,7 +31,7 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 		// state: []
 	};
 	this.score = tankData ? tankData.score : 0;
-	this.coins = 0;
+	this.coins = 10;
 	// this.given = 0;
 	this.rescuedFloaters = 0;
 

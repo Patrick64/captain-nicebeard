@@ -101,17 +101,18 @@ World.prototype.inView= function(xy) {
 World.prototype.getQueuedEvents = function(curTime) {
 	this.player.updateLastEventInQueue(curTime);
 	return {
-		player:this.player.eventsQueue,
-		tokens:Object.keys(this.tokens).reduce(
-			function(obj,tokenId) { 
-				obj[tokenId] = this.tokens[tokenId].eventsQueue;
-				return obj;
-			}.bind(this),{}),
-		floaters:Object.keys(this.floaters).reduce(
-			function(obj,id) { 
-				obj[id] = this.floaters[id].eventsQueue;
-				return obj;
-			}.bind(this),{})
+		player:this.player.eventsQueue
+		// ,
+		// tokens:Object.keys(this.tokens).reduce(
+		// 	function(obj,tokenId) { 
+		// 		obj[tokenId] = this.tokens[tokenId].eventsQueue;
+		// 		return obj;
+		// 	}.bind(this),{}),
+		// floaters:Object.keys(this.floaters).reduce(
+		// 	function(obj,id) { 
+		// 		obj[id] = this.floaters[id].eventsQueue;
+		// 		return obj;
+		// 	}.bind(this),{})
 			
 	};
 }

@@ -1,6 +1,6 @@
 {
   "props": {
-    "cname": 106,
+    "cname": 105,
     "props": {
       "$fullscreen": "g",
       "$keysDown": "h",
@@ -90,11 +90,10 @@
       "$landscapeChanged": "Ta",
       "$tanks": "Ua",
       "$deleteWorld": "Va",
-      "$lastTank": "Wa",
-      "$addTank": "Xa",
-      "$worldIndex": "Ya",
-      "$tokenId": "Za",
-      "$dot2": "$a"
+      "$addTank": "Wa",
+      "$worldIndex": "Xa",
+      "$tokenId": "Ya",
+      "$dot2": "Za"
     }
   },
   "vars": {

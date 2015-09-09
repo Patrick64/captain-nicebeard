@@ -37,6 +37,10 @@ function startServer() {
       player.receiveGameState(data);
       fn(true);
     });
+    socket.on('disconnect', function(){
+      player.tank=null;
+      player=null;
+    });
 
   });
 
@@ -47,7 +51,7 @@ function Player() {
   this.playerId = nextPlayerId;
   nextPlayerId++;
   this.level = 0;
-  this.world = worlds[this.level];
+  //this.world = worlds[this.level];
   this.events = [];
   //	this.lastTank = null;
   this.landscapeChanged = true;
@@ -55,11 +59,11 @@ function Player() {
 }
 
 Player.prototype.newGame = function(socket) {
-  this.world = worlds[this.level];
-  if (this.world.tanks.length > maxPlayersPerLevel ) {
-    this.world.deleteWorld();
+  var world = worlds[this.level];
+  if (world.tanks.length > maxPlayersPerLevel ) {
+    world.deleteWorld();
     worlds[this.level] = getNewWorld(this.level);
-    this.world = worlds[this.level];
+    world = worlds[this.level];
     this.landscapeChanged = true;
   }
 
@@ -68,21 +72,21 @@ Player.prototype.newGame = function(socket) {
 
   var game = {
     player: this.tank.toPlainObject(),
-    world: this.world.toPlainObject(),
-    lastTank: this.lastTank,
+    world: world.toPlainObject(),
+    // lastTank: this.lastTank,
     landscapeChanged:this.landscapeChanged
   };
 
 
   socket.emit("receive-game", game);
-  this.lastTank = this.tank;
+  // this.lastTank = this.tank;
 
 }
 
 Player.prototype.receiveGameState = function(data) {
-  
-  this.world.addTank(this.tank);
-  this.world.addTokens(2, 8 );
+  var world = worlds[this.level];
+  world.addTank(this.tank);
+  world.addTokens(2, 8 );
   this.landscapeChanged = false;
   if (data.levelComplete) {
     this.level++;
@@ -150,7 +154,7 @@ function Token(x, y) {
   this.xpos = x;
   this.ypos = y;
   this.tokenId = nextTokenId;
-  this.events = [];
+  // this.events = [];
   nextTokenId++;
 }
 Token.prototype.toPlainObject = function() {
@@ -158,14 +162,15 @@ Token.prototype.toPlainObject = function() {
     xpos: this.xpos,
     ypos: this.ypos,
     tokenId: this.tokenId,
-    id: this.tokenId,
-    events: this.events
+    id: this.tokenId
+    // ,
+    // events: this.events
   };
 }
 
-Token.prototype.addEvents = function(events) {
-  this.events.push.apply(this.events, events);
-}
+// Token.prototype.addEvents = function(events) {
+//   this.events.push.apply(this.events, events);
+// }
 
 
 function World(level) {
@@ -206,6 +211,7 @@ World.prototype.addTokens = function(numTokens, numFloaters) {
 World.prototype.deleteWorld = function() {
   this.tanks = [];
   this.tokens = [];
+  this.floaters = [];
 }
 
 World.prototype.addTank = function(tank) {
