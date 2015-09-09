@@ -86,7 +86,7 @@ Player.prototype.newGame = function(socket) {
 Player.prototype.receiveGameState = function(data) {
   var world = worlds[this.level];
   world.addTank(this.tank);
-  world.addTokens(2, 8 );
+  world.addTokens(3, 8 );
   this.landscapeChanged = false;
   if (data.levelComplete) {
     this.level++;
@@ -191,7 +191,7 @@ World.prototype.addTokens = function(numTokens, numFloaters) {
   noise.seed(this.landscapeSeed);
   var tokensCount = 0,
     floatersCount = 0;
-  while (tokensCount < numTokens || floatersCount < numFloaters) {
+  while (tokensCount < numTokens && floatersCount < numFloaters) {
     var x = Math.floor(Math.random() * this.width);
     var y = Math.floor(Math.random() * this.height);
     var value = Math.abs(noise.perlin2(x / (600), y / (600)));
