@@ -78,24 +78,34 @@ var Goo = function(o) {
     }
 
           
-  document.addEventListener("keydown", function(e) {
-      self.keyCode = e.keyCode;
+  window.addEventListener("keydown", function(e) {
+      
+      self.keyCode = e.keyCode ? e.keyCode : e.charCode;
       self.key =  String.fromCharCode(self.keyCode);
       self.keysDown[self.keyCode] = true;
       if (self.onKeyDown) self.onKeyDown(self)
+      
     }, false);
     
-  document.addEventListener("keyup", function(e) {
-      self.keyCode = e.keyCode;
+  window.addEventListener("keyup", function(e) {
+      
+      self.keyCode = e.keyCode ? e.keyCode : e.charCode;
       self.key =  String.fromCharCode(self.keyCode);
       delete self.keysDown[self.keyCode];
       if (self.onKeyUp) self.onKeyUp(self)
+      
     }, false);
 
-  document.addEventListener("keypress", function(e) {
-      self.keyCode = e.keyCode;
+  window.addEventListener("keypress", function(e) {
+      
+      self.keyCode = e.keyCode ?  e.keyCode : e.charCode;
       self.key =  String.fromCharCode(self.keyCode);
-      if (self.onKeyPress) self.onKeyPress(self)
+      if (self.onKeyPress) {
+        if (self.onKeyPress(self) || self.keyCode == 39 || self.keyCode == 37) {
+          e.preventDefault();  
+        }
+      }
+      
     }, false);
       
    var sizeCanvas = (function() {

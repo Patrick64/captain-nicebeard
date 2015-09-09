@@ -32,10 +32,10 @@ function startServer() {
       player.newGame(socket);
     });
 
-    socket.on('tank-state', function(data) {
+    socket.on('tank-state', function(data,fn) {
       //var events = JSON.parse(data);
       player.receiveGameState(data);
-
+      fn(true);
     });
 
   });
@@ -82,7 +82,7 @@ Player.prototype.newGame = function(socket) {
 Player.prototype.receiveGameState = function(data) {
   
   this.world.addTank(this.tank);
-  this.world.addTokens(2, 5 );
+  this.world.addTokens(2, 8 );
   this.landscapeChanged = false;
   if (data.levelComplete) {
     this.level++;
@@ -170,13 +170,13 @@ Token.prototype.addEvents = function(events) {
 function World(level) {
 
   this.worldDuration = 5 * 60 * 1000;
-  this.height = 2000 + 400*level;
-  this.width = 3000 +  400*level;
+  this.height = 200.0 + 400*level;
+  this.width = 300.0 +  400*level;
   this.events = [];
   this.tanks = [];
   this.tokens = [];
   this.floaters = [];
-  this.sealevel = level*8;
+  this.sealevel = level*7;
   this.landscapeSeed = Math.floor(Math.random() * 10000);
   this.level = level;
 }
@@ -191,7 +191,7 @@ World.prototype.addTokens = function(numTokens, numFloaters) {
     var value = Math.abs(noise.perlin2(x / (600), y / (600)));
     value *= 256;
     value = Math.min(256, value + this.sealevel);
-    if (value > 70 && value < 80 && tokensCount < numTokens) {
+    if (value > 70 && value < 77 && tokensCount < numTokens) {
       this.tokens.push(new Token(x, y));
       tokensCount++;
     }

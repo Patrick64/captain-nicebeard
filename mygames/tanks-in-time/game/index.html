@@ -13,17 +13,20 @@ html{ font-family: georgia, sans-serif; background: 0000C6;}
   -ms-interpolation-mode: nearest-neighbor;   
   image-rendering: pixelated;
 }
-.landscape-wrap { overflow:hidden;}
+#landscape-wrap { overflow:hidden; overflow-x: hidden; overflow-y: hidden; }
 #landscape { position:absolute;  }
 #goocanvas { z-index:10; position: absolute; top: 0; left: 0;}
 
 
 .hud { position:absolute; z-index:20; top:10px; right:10px; font-size:25px; color:#fff;}
 .hud > p { background:rgba(0,0,0,0.5); display: inline-block;; margin-right:10px; padding:5px 10px;}
-#overlay {     position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 50%;
+#overlay {     
+ position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width:600px;
+
     margin: 0 auto;
     
     z-index: 20;
@@ -80,7 +83,7 @@ html{ font-family: georgia, sans-serif; background: 0000C6;}
 </head>
 <body>
 
-  <div class="landscape-wrap">
+  <div id="landscape-wrap">
     <canvas id='landscape' class="noSmoothing" > </canvas>
   </div>
 

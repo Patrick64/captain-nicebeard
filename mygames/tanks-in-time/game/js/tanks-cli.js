@@ -25,7 +25,7 @@ var g = new Goo({
 		maingame.onDraw(g);
 	},
 	onKeyPress: function(g) {
-		maingame.onKeyPress(g);
+		return maingame.onKeyPress(g);
 	}
 });
 
@@ -36,7 +36,10 @@ function gid(id) {
 
 
 function onLoad() {
-	var l = new Landscape(screen.width, screen.height, 2, Math.random() * 2000,5);
+	gid('landscape-wrap').style.width=g.width + 'px';
+	gid('landscape-wrap').style.height=g.height + 'px';
+	
+	var l = new Landscape(g.width, g.height, 2, Math.random() * 2000,5);
 	l.render();
 	gid('nameform').onsubmit = function(e) {
 		gid('intro').style.display = 'none';
@@ -47,6 +50,7 @@ function onLoad() {
 				//gid('overlay').style.display  = 'none';
 				
 				startGame(gid('nameinput').value);
+				return true;
 			}
 		}
 
@@ -61,12 +65,12 @@ function startGame(playerName) {
 	showLoading("Press space to start game!")
 
 	function showLoading(spaceText) {
-		gid('saying').innerText = pirateSayings[Math.floor(pirateSayings.length*Math.random())];	
+		gid('saying').textContent = pirateSayings[Math.floor(pirateSayings.length*Math.random())];	
 		gid('newLevel').style.display = 'block';
 		gid('info').style.display = 'none';
 		gid('press-space').style.display = 'none';
 		gid('overlay').className = 'show';
-		gid('press-space').innerText = spaceText;
+		gid('press-space').textContent = spaceText;
 		gid('loading-text').style.display = 'block';
 		
 	}
@@ -75,7 +79,7 @@ function startGame(playerName) {
 		showLoading(gameComplete ? "Press space to restart game." : (levelComplete ? "Press space to travel to next sea." : "Press space to retry this sea."));
 		
 		if (!levelComplete || gameComplete) {
-			gid('finalscore').innerText = 
+			gid('finalscore').textContent = 
 			(gameComplete ? "CONGRATULATIONS! You have completed all seven seas. Your final score is " : "You scored ")
 			 + maingame.playerScore;	
 			if (gameComplete)
@@ -85,7 +89,7 @@ function startGame(playerName) {
 			else
 				var status = "Yarr! I scored " + maingame.playerScore + " on Captain Nicebeard, the reverse pirate! " + window.location.href;
 			var twit = "http://twitter.com/home/?status=" + encodeURIComponent(status);
-			gid('twit').innerText = "Post to Twitter: " + status;	
+			gid('twit').textContent = "Post to Twitter: " + status;	
 			gid('twit').href = twit;	
 			gid('tweetthis').className = 'show';
 		} else {
@@ -110,11 +114,11 @@ function startGame(playerName) {
 }
 
 function newGame(worldData, player, socket, maingame, lastTank, playerName, landscapeChanged) {
-	var startTime = Date.now();
+	var st = Date.now();
 
 	function getCurTime() {
 		
-			return Date.now() - startTime;
+			return Date.now() - st;
 		
 	}
 
@@ -136,18 +140,19 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 		if (!!(g.keyCode == 32)) {
 			gid('overlay').className = '';
 			startLoadedGame();
+			return true;
 		}
 	}
 
 
 	function startLoadedGame() {
-		startTime = Date.now();
+		st = Date.now();
 		showNotification("Sea number " + (world.level+1) + " of 7 ahoy!");
 
 		var curTime = getCurTime();
 		world.player.recordTankState(curTime);
 
-		function sendGameState(levelComplete) {
+		function sendGameState(levelComplete,callback) {
 			var curTime = getCurTime();
 			//recordTankState(player);
 			// var eventQueues = world.getQueuedEvents(curTime);
@@ -156,7 +161,7 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 				eventQueues: world.getQueuedEvents(curTime),
 				levelComplete: levelComplete,
 				player: world.player.toPlainObject()
-			});
+			},callback);
 			// world.flushQueuedEvents(curTime);
 		}
 
@@ -185,8 +190,9 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 			world.player.recordTankState(curTime);
 			
 			window.setTimeout(function() {
-				sendGameState(levelComplete);
-				maingame.endLevel(levelComplete,(world.level==6 && levelComplete));
+				sendGameState(levelComplete,function() {
+					maingame.endLevel(levelComplete,(world.level==6 && levelComplete));	
+				});
 			}, 1000);
 			
 		}
@@ -196,8 +202,11 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 				world.player.fire(getCurTime(),-1);
 			
 			//if (!!(g.keyCode == "x".charCodeAt(0) || g.keyCode == "X".charCodeAt(0))) { // x
-			if (g.keyCode == 120) // x
+			else if (g.keyCode == 120) // x
 				world.player.fire(getCurTime(),1);
+			else
+				return false;
+			return true;
 			
 		}
 		var lastFrameTime = Date.now();
@@ -228,10 +237,10 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 		var t =  (world.worldDuration - getCurTime()) / 1000;
 		var m = Math.floor(t / 60);
 		var s = Math.floor(t % 60);
-		timerElement.innerText = m + ':' + (s < 10 ? '0' : '') + s;
-		scoreElement.innerText = "Score: " + world.player.score;
+		timerElement.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+		scoreElement.textContent = "Score: " + world.player.score;
 		
-		coinsElement.innerText = "Coins: " + world.player.coins;
+		coinsElement.textContent = "Coins: " + world.player.coins;
 		
 		
 
@@ -250,7 +259,7 @@ var hideNotification = false;
 function showNotification(str) {
 	var wrap = gid('notification-wrap');	
 	var notif = gid('notification');	
-	notif.innerText=str;
+	notif.textContent=str;
 	wrap.className = "show";
 	if (hideNotification) clearInterval(hideNotification);
 	hideNotification = window.setInterval(function() {

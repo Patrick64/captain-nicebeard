@@ -64,12 +64,18 @@ World.prototype.render = function(g,curTime) {
 		
 		
 		Object.keys(this.tokens).forEach(function(t) {
+			Object.keys(this.otherTanks).forEach(function(p) {
+				this.tokens[t].compareTank(this.otherTanks[p],curTime);
+			}.bind(this));	
 			this.tokens[t].compareTank(this.player,curTime);
 			this.tokens[t].tick(delta,curTime);
 			this.tokens[t].draw(g,curTime,this);
 		}.bind(this));
 
 		Object.keys(this.floaters).forEach(function(t) {
+			Object.keys(this.otherTanks).forEach(function(p) {
+				this.floaters[t].compareTank(this.otherTanks[p],curTime);
+			}.bind(this));
 			this.floaters[t].compareTank(this.player,curTime);
 			this.floaters[t].tick(delta,curTime);
 			this.floaters[t].draw(g,curTime,this);

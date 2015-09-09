@@ -16,11 +16,11 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 	this.tankId = tankId;
 	this.world = world;
 	
-	this.keyLeft = false;
-	this.keyRight = false;
+	this.kl = false;
+	this.kr = false;
 	this.keyShoot = false;
-	this.velocity = 0;
-	this.acceleration = 0;
+	this.vel = 0;
+	this.acc = 0;
 	this.lastState = null;
 	this.bullets = [];
 	this.active = true;
@@ -47,7 +47,7 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 
 	// forward sort by start time
 	this.events.movements.sort(function(a, b) {
-		if (a.startTime < b.startTime) return -1;
+		if (a.st < b.st) return -1;
 		else return 1;
 	});
 	this.curEventIndex = 0;
@@ -56,7 +56,7 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 Tank.prototype.tick = function(g, delta, world, curTime) {
 	if (this.active) {
 
-			while (this.curEventIndex < this.events.movements.length && this.events.movements[this.curEventIndex].startTime < curTime) {
+			while (this.curEventIndex < this.events.movements.length && this.events.movements[this.curEventIndex].st < curTime) {
 				var curEvent = this.events.movements[this.curEventIndex];
 				this.setState(curEvent);
 				this.curEventIndex++;
@@ -66,42 +66,46 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 
 
 		// rotate/turn
-		if (this.keyLeft) {
+		if (this.kl) {
 			newAngle = (this.angle - TURN_SPEED * delta) % 360;
-			this.acceleration = ACCELERATION / 50;
-			//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
-		} else if (this.keyRight) {
+			this.acc = ACCELERATION / 50;
+			//this.acc = Math.max(this.acc,ACCELERATION/2);
+		} else if (this.kr) {
 			newAngle = (this.angle + TURN_SPEED * delta) % 360;
-			this.acceleration = ACCELERATION / 50;
-			//this.acceleration = Math.max(this.acceleration,ACCELERATION/2);
+			this.acc = ACCELERATION / 50;
+			//this.acc = Math.max(this.acc,ACCELERATION/2);
 		} else {
-			this.acceleration = ACCELERATION / 10;
+			this.acc = ACCELERATION / 10;
 		}
 
 
 
 		// 
 		
-			this.velocity = this.velocity + (this.acceleration * delta);
+			this.vel = this.vel + (this.acc * delta);
 		
-		if (this.velocity > MAX_FORWARD) this.velocity = MAX_FORWARD;
+		if (this.vel > MAX_FORWARD) this.vel = MAX_FORWARD;
 		
 
 		this.angle = newAngle;
 
-		if (this.xpos < -50 || (this.xpos >= this.world.width + 50) ||
-			(this.ypos < -50) || (this.ypos >= this.world.height + 50)) {
-			this.angle = this.angle + 180;
-
-		}
+		
 
 		// move forward/backward
 		// 
-		var xy =this.translatePosition(this, {x:0,y:this.velocity * 60 * delta}, this.angle);
-		this.xpos = xy.x; this.ypos = xy.y;
+		var xy =this.translatePosition(this, {x:0,y:this.vel * 60 * delta}, this.angle);
+		
+		if (xy.x < -50 || (xy.x >= this.world.width + 50) ||
+			(xy.y < -50) || (xy.y >= this.world.height + 50)) {
+			this.angle = this.angle + 180;
+		} else {
+			this.xpos = xy.x; this.ypos = xy.y;
+		}
+		
+		
 		// var x = 0;
 		
-		// var y = this.velocity * 60 * delta;
+		// var y = this.vel * 60 * delta;
 
 		// var angleRads = this.angle * (Math.PI / 180.0);
 
@@ -132,13 +136,13 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 		this.events.gun.forEachCurrentEvent(curTime, function(curEvent, prevEvent) {
 
 			if (curEvent.isFired) {
-				this.bullets.push(new Bullet(this, curEvent.startX, curEvent.startY, curEvent.angle, curTime, curEvent.startTime));
+				this.bullets.push(new Bullet(this, curEvent.startX, curEvent.startY, curEvent.angle, curTime, curEvent.st));
 			}
 		}.bind(this));
 
 		this.events.state.forEachCurrentEvent(curTime, function(curEvent, prevEvent) {
 
-				this.active = curEvent.active;
+				//this.active = curEvent.active;
 		}.bind(this));
 
 		
@@ -220,7 +224,7 @@ Tank.prototype.fire = function(curTime, direction) {
 			worldTime: curTime,
 			startX: this.xpos,
 			startY: this.ypos,
-			startTime: curTime,
+			st: curTime,
 			angle: bulletAngle,
 		});
 		this.coins--;
@@ -250,13 +254,13 @@ Tank.prototype.setState = function(state) {
 		this.ypos = state.ypos;
 
 	if (this.lastState ) {
-		this.keyLeft = state.keyLeft;
-		this.keyRight = state.keyRight;
+		this.kl = state.kl;
+		this.kr = state.kr;
 	}
 
 	this.lastState = state;
-	//this.velocity = state.velocity ;
-	//this.acceleration = state.acceleration;
+	//this.vel = state.vel ;
+	//this.acc = state.acc;
 }
 
 Tank.prototype.draw = function(g, worldTime, world) {
@@ -291,7 +295,9 @@ Tank.prototype.draw = function(g, worldTime, world) {
 			g.ctx.stroke();
 		}
 
-	g.ctx.drawImage(sprite,0,0,126,118, 394 / 4 / 2, 371 / 4 / 4, -394 / 4, -371 / 4);
+	g.ctx.drawImage(sprite,0,0,126,118, 
+		-394 / 4 / 2, -371 / 4 / 1.5, 
+		394 / 4, 371 / 4);
 	//if (this.isPlayer) g.ctx.strokeRect(-25, -50, 50, 100);
 	
 	if (!this.isPlayer) {
@@ -324,19 +330,19 @@ Tank.prototype.draw = function(g, worldTime, world) {
 };
 
 Tank.prototype.handleKeys = function(g, curTime) {
-	var lastKeyCombo = this.keyForward * 2 + this.keyReverse * 4 + this.keyLeft * 8 + this.keyRight * 16;
+	var lastKeyCombo = this.keyForward * 2 + this.keyReverse * 4 + this.kl * 8 + this.kr * 16;
 	// Support arrow keys, WASD and 2468
-	this.keyLeft = !!(g.keysDown[37] || g.keysDown[65] || g.keysDown[52]);
-	this.keyRight = !!(g.keysDown[39] || g.keysDown[68] || g.keysDown[54]);
+	this.kl = !!(g.keysDown[37] || g.keysDown[65] || g.keysDown[52]);
+	this.kr = !!(g.keysDown[39] || g.keysDown[68] || g.keysDown[54]);
 
-	var curKeyCombo = this.keyForward * 2 + this.keyReverse * 4 + this.keyLeft * 8 + this.keyRight * 16;
+	var curKeyCombo = this.keyForward * 2 + this.keyReverse * 4 + this.kl * 8 + this.kr * 16;
 
 
 
 	if (curKeyCombo != lastKeyCombo)
 		this.recordTankState(curTime);
 
-
+	//return (kl || kr);
 }
 
 // Tank.prototype.hit = function(byTank) {
@@ -346,29 +352,29 @@ Tank.prototype.handleKeys = function(g, curTime) {
 
 Tank.prototype.recordTankState = function(curTime) {
 
-	// set startTime and endTime for last event
+	// set st and et for last event
 	this.updateLastEventInQueue(curTime);
 	this.eventsQueue.movements.push({
 		tankId: this.tankId,
-		startTime: curTime,
-		endTime: curTime,
+		st: curTime,
+		et: curTime,
 		angle: this.angle,
 		xpos: this.xpos,
 		ypos: this.ypos,
-		keyLeft: this.keyLeft,
-		keyRight: this.keyRight,
-		velocity: this.velocity,
-		acceleration: this.acceleration
+		kl: this.kl,
+		kr: this.kr,
+		vel: this.vel,
+		acc: this.acc
 	});
 }
 
 Tank.prototype.updateLastEventInQueue = function(curTime) {
 
-	// set startTime and endTime for last event
+	// set st and et for last event
 	if (this.eventsQueue.movements.length) {
 		var lastEvent = this.eventsQueue.movements[this.eventsQueue.movements.length - 1];
-		lastEvent.startTime = Math.min(lastEvent.startTime, curTime);
-		lastEvent.endTime = Math.max(lastEvent.endTime, curTime);
+		lastEvent.st = Math.min(lastEvent.st, curTime);
+		lastEvent.et = Math.max(lastEvent.et, curTime);
 	}
 
 }

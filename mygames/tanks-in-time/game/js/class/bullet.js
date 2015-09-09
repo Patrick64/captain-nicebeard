@@ -1,4 +1,4 @@
-function Bullet(tank,xpos,ypos,angle,curTime,startTime) {
+function Bullet(tank,xpos,ypos,angle,curTime,st) {
 	
 	this.angle = angle;
 	this.tank = tank;
@@ -6,7 +6,7 @@ function Bullet(tank,xpos,ypos,angle,curTime,startTime) {
 	this.ypos = ypos;
 	this.startX = xpos;
 	this.startY = ypos;
-	this.startTime = startTime;
+	this.st = st;
 	this.active = true;	
 
 }
@@ -30,7 +30,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 				
 					Object.keys(world.otherTanks).forEach(function(tankId) {
 						var otherTank = world.otherTanks[tankId];
-						if ( (dist(otherTank,this)<50 && otherTank.active) && (otherTank!=this) ) {
+						if ( (dist(otherTank,this)<50 && otherTank.active) && (otherTank!=this.tank) ) {
 							
 							this.hitTank(otherTank,curTime);
 
@@ -71,7 +71,7 @@ Bullet.prototype.draw = function(g,worldtime,world) {
 	if (this.active && world.inView(this)) {
 		g.ctx.save();
 		g.ctx.translate(this.xpos, this.ypos);
-		g.ctx.scale(1,0.2+(Math.cos((worldtime-this.startTime)/200)-0.2));
+		g.ctx.scale(1,0.2+(Math.cos((worldtime-this.st)/200)-0.2));
 			
 
 		g.ctx.fillStyle = "#B88A0E"; 
