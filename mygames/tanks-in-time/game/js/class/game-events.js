@@ -1,4 +1,4 @@
-'use strict';
+
 
 function GameEvents(events) {
 	this.curEventIndex=0;

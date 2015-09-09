@@ -1,4 +1,4 @@
-'use strict';
+
 
 var MAX_FORWARD = 3.0;
 var ACCELERATION = 10;
@@ -122,7 +122,7 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 		
 	}
 
-	var curEventIndex = 0;
+	//var curEventIndex = 0;
 	// var eventsQueue = [];
 	var timerElement = gid('worldTime');
 	var scoreElement = gid('score');
@@ -209,7 +209,7 @@ function newGame(worldData, player, socket, maingame, lastTank, playerName, land
 			return true;
 			
 		}
-		var lastFrameTime = Date.now();
+//		var lastFrameTime = Date.now();
 		maingame.onDraw = function(g) {
 			var curTime = getCurTime();
 			world.render(g, curTime);

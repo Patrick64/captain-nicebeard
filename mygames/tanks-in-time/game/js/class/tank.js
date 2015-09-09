@@ -43,7 +43,7 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 		gun: tankData ? new GameEvents(tankData.events.gun) : new GameEvents([]),
 		state: tankData ? new GameEvents(tankData.events.state) : new GameEvents([]),
 	}
-	var firstState = this.events.state.getNextEvent();
+//	var firstState = this.events.state.getNextEvent();
 
 	// forward sort by start time
 	this.events.movements.sort(function(a, b) {
@@ -128,8 +128,8 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 		//	this.xpos = prevX;
 		//	this.ypos = prevY;
 		//}
-		var carLength = 100;
-		this.wrapped = false;
+//		var carLength = 100;
+	//	this.wrapped = false;
 
 
 

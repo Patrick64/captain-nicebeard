@@ -45,7 +45,7 @@ Landscape.prototype.render = function() {
 	var image = ctx.createImageData(this.width, this.height);
 	var data = image.data;
 
-	var start = Date.now();
+	//var start = Date.now();
 	noise.seed(this.seed);
 	for (var x = 0; x < this.width; x++) {
 		//if (x % 100 == 0) {
@@ -114,7 +114,7 @@ Landscape.prototype.render = function() {
 			noise.simplex2(x / 50, y/50);
 		}
 	}*/
-	var end = Date.now();
+	//var end = Date.now();
 
 	ctx.fillColor = '#000';
 	ctx.fillRect(0, 0, 10000, 10000);

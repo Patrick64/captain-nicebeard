@@ -119,7 +119,7 @@ function Tank(worldIndex, player) {
 
   
 
-  var world = worlds[this.worldIndex];
+  //var world = worlds[this.worldIndex];
   this.events = {
     movements: [],
     gun: [],
@@ -170,8 +170,8 @@ Token.prototype.addEvents = function(events) {
 function World(level) {
 
   this.worldDuration = 5 * 60 * 1000;
-  this.height = 200.0 + 400*level;
-  this.width = 300.0 +  400*level;
+  this.height = 2000 + 400*level;
+  this.width = 3000 +  400*level;
   this.events = [];
   this.tanks = [];
   this.tokens = [];
