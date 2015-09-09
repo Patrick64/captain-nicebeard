@@ -16,7 +16,7 @@ function World(worldData,player,curTime,lastTank) {
 		this.otherTanks[p.tankId] = new Tank(this,p.tankId,p,false,curTime);
 	}.bind(this));
 	worldData.tokens.forEach(function(t) {
-		this.tokens[t.tokenId] = new Token(t);
+		this.tokens[t.id] = new Token(t);
 	}.bind(this));
 	worldData.floaters.forEach(function(t) {
 		this.floaters[t.id] = new Floater(t);

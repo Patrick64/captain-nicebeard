@@ -11,7 +11,7 @@ var maxPlayersPerLevel = 20;
 
 function getNewWorld(i) {
   var w = new World(i);
-  w.addTokens(10, 15 );
+  w.addTokens(7, 15 );
   return w;
 
 }
@@ -86,7 +86,7 @@ Player.prototype.newGame = function(socket) {
 Player.prototype.receiveGameState = function(data) {
   var world = worlds[this.level];
   world.addTank(this.tank);
-  world.addTokens(5, 8 );
+  world.addTokens(3, 8 );
   this.landscapeChanged = false;
   if (data.levelComplete) {
     this.level++;
@@ -153,7 +153,7 @@ Tank.prototype.addEvents = function(events) {
 function Token(x, y) {
   this.xpos = x;
   this.ypos = y;
-  this.tokenId = nextTokenId;
+  this.id = nextTokenId;
   // this.events = [];
   nextTokenId++;
 }
@@ -161,8 +161,7 @@ Token.prototype.toPlainObject = function() {
   return {
     xpos: this.xpos,
     ypos: this.ypos,
-    tokenId: this.tokenId,
-    id: this.tokenId
+    id: this.id
     // ,
     // events: this.events
   };
@@ -197,7 +196,7 @@ World.prototype.addTokens = function(numTokens, numFloaters) {
     var value = Math.abs(noise.perlin2(x / (600), y / (600)));
     value *= 256;
     value = Math.min(256, value + this.sealevel);
-    if (value > 68 && value < 77 && tokensCount < numTokens) {
+    if (value > 68 && value < 79 && tokensCount < numTokens) {
       this.tokens.push(new Token(x, y));
       tokensCount++;
     }

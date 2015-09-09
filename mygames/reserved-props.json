@@ -1,4 +1,4 @@
 {
   "vars": [ "exports", "module", "Class", "noise" ],
-  "props": [ "ctx","exports", "perlin2", "Class", "extend", "noise", "players"  ]
+  "props": [ "ctx","exports", "perlin2", "Class", "extend", "noise", "players", "tokens"  ]
 }
