@@ -97,18 +97,18 @@ Player.prototype.receiveGameState = function(data) {
     this.tank.playerName = data.player.playerName;
   }
   this.tank.addEvents(data.eventQueues.player);
-  this.world.tokens.forEach(function(t) {
-    if (data.eventQueues.tokens[t.tokenId]) {
-      var events = data.eventQueues.tokens[t.tokenId];
-      t.addEvents(events);
-    }
-  });
-  this.world.floaters.forEach(function(t) {
-    if (data.eventQueues.floaters[t.id]) {
-      var events = data.eventQueues.floaters[t.id];
-      t.addEvents(events);
-    }
-  });
+  // this.world.tokens.forEach(function(t) {
+  //   if (data.eventQueues.tokens[t.tokenId]) {
+  //     var events = data.eventQueues.tokens[t.tokenId];
+  //     t.addEvents(events);
+  //   }
+  // });
+  // this.world.floaters.forEach(function(t) {
+  //   if (data.eventQueues.floaters[t.id]) {
+  //     var events = data.eventQueues.floaters[t.id];
+  //     t.addEvents(events);
+  //   }
+  // });
 }
 
 
@@ -122,8 +122,9 @@ function Tank(worldIndex, player) {
   //var world = worlds[this.worldIndex];
   this.events = {
     movements: [],
-    gun: [],
-    state: []
+    gun: []
+    // ,
+    // state: []
   };
 
 }
@@ -141,7 +142,7 @@ Tank.prototype.toPlainObject = function() {
 Tank.prototype.addEvents = function(events) {
   this.events.movements.push.apply(this.events.movements, events.movements);
   this.events.gun.push.apply(this.events.gun, events.gun);
-  this.events.state.push.apply(this.events.state, events.state);
+  // this.events.state.push.apply(this.events.state, events.state);
 
 };
 
@@ -213,12 +214,12 @@ World.prototype.addTank = function(tank) {
 
 World.prototype.addEvents = function(data) {
   this.events.push.apply(this.events, data.player);
-  this.tokens.forEach(function(t) {
-    if (data.tokens[t.tokenId]) {
-      var events = data.tokens[t.tokenId];
-      t.addEvents(events);
-    }
-  });
+  // this.tokens.forEach(function(t) {
+  //   if (data.tokens[t.tokenId]) {
+  //     var events = data.tokens[t.tokenId];
+  //     t.addEvents(events);
+  //   }
+  // });
 }
 
 World.prototype.toPlainObject = function() {

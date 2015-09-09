@@ -5,15 +5,16 @@ var Token = Class.extend({
 
 		this.xpos = tokendata.xpos;
 		this.ypos = tokendata.ypos;
-		this.events = new GameEvents(tokendata.events);
-		this.eventsQueue = [];
-		var firstEvent = this.events.getNextEvent();
-		if (firstEvent==null) 
-			this.visible = true;
-		else {
-			this.runEvent(firstEvent);
-			this.visible = !this.visible;
-		}
+		this.visible = true;
+		// this.events = new GameEvents(tokendata.events);
+		// this.eventsQueue = [];
+		// var firstEvent = this.events.getNextEvent();
+		// if (firstEvent==null) 
+		// 	this.visible = true;
+		// else {
+		// 	this.runEvent(firstEvent);
+		// 	this.visible = !this.visible;
+		// }
 
 	}
 
@@ -40,29 +41,29 @@ var Token = Class.extend({
 
 	}
 
-	,tick: function(delta,worldTime) {
+	// ,tick: function(delta,worldTime) {
 
-		this.events.forEachCurrentEvent(worldTime,function(event) {
-			this.runEvent(event);
-		}.bind(this));
-	}
+	// 	this.events.forEachCurrentEvent(worldTime,function(event) {
+	// 		this.runEvent(event);
+	// 	}.bind(this));
+	// }
 
-	,runEvent: function(event) {
+	// ,runEvent: function(event) {
 		
-			this.visible = event.visible;
+	// 		this.visible = event.visible;
 		
-	}
+	// }
 
 	,compareTank: function(player,worldTime) {
 		if (dist(this,player)<50 && this.visible)	{
 
 			this.visible=false;
 			
-			this.eventsQueue.push({
-				worldTime: worldTime,
-				visible: this.visible,
-				tankId: player.tankId
-			});
+			// this.eventsQueue.push({
+			// 	worldTime: worldTime,
+			// 	visible: this.visible,
+			// 	tankId: player.tankId
+			// });
 			this.tankHit(player,worldTime);
 		}
 

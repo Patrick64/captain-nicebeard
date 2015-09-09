@@ -26,12 +26,13 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 	this.active = true;
 	this.eventsQueue = {
 		movements: [],
-		gun: [],
-		state: []
+		gun: []
+		// ,
+		// state: []
 	};
 	this.score = tankData ? tankData.score : 0;
 	this.coins = 0;
-	this.given = 0;
+	// this.given = 0;
 	this.rescuedFloaters = 0;
 
 	// if (isPlayer) 
@@ -40,8 +41,8 @@ function Tank(world, tankId, tankData, isPlayer, curTime, lastTank) {
 
 	this.events = {
 		movements: tankData ? tankData.events.movements : [],
-		gun: tankData ? new GameEvents(tankData.events.gun) : new GameEvents([]),
-		state: tankData ? new GameEvents(tankData.events.state) : new GameEvents([]),
+		gun: tankData ? new GameEvents(tankData.events.gun) : new GameEvents([])
+		// ,state: tankData ? new GameEvents(tankData.events.state) : new GameEvents([]),
 	}
 //	var firstState = this.events.state.getNextEvent();
 
@@ -62,16 +63,16 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 				this.curEventIndex++;
 			}
 
-		var newAngle = this.angle;
+		// var newAngle = this.angle;
 
 
 		// rotate/turn
 		if (this.kl) {
-			newAngle = (this.angle - TURN_SPEED * delta) % 360;
+			this.angle = (this.angle - TURN_SPEED * delta) % 360;
 			this.acc = ACCELERATION / 50;
 			//this.acc = Math.max(this.acc,ACCELERATION/2);
 		} else if (this.kr) {
-			newAngle = (this.angle + TURN_SPEED * delta) % 360;
+			this.angle = (this.angle + TURN_SPEED * delta) % 360;
 			this.acc = ACCELERATION / 50;
 			//this.acc = Math.max(this.acc,ACCELERATION/2);
 		} else {
@@ -87,7 +88,7 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 		if (this.vel > MAX_FORWARD) this.vel = MAX_FORWARD;
 		
 
-		this.angle = newAngle;
+		// this.angle = newAngle;
 
 		
 
@@ -140,10 +141,10 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 			}
 		}.bind(this));
 
-		this.events.state.forEachCurrentEvent(curTime, function(curEvent, prevEvent) {
+		// this.events.state.forEachCurrentEvent(curTime, function(curEvent, prevEvent) {
 
-				//this.active = curEvent.active;
-		}.bind(this));
+		// 		//this.active = curEvent.active;
+		// }.bind(this));
 
 		
 			
@@ -166,11 +167,11 @@ Tank.prototype.tick = function(g, delta, world, curTime) {
 
 Tank.prototype.crash = function(otherTank,curTime) {
 	if (!this.isPlayer || curTime>3000) {
-		this.eventsQueue.state.push({
-			worldTime: curTime,
-			active: false,
-			byTankId: null
-		});
+		// this.eventsQueue.state.push({
+		// 	worldTime: curTime,
+		// 	active: false,
+		// 	byTankId: null
+		// });
 		this.active = false;
 		if (this.isPlayer && otherTank) {
 			maingame.collidedWith = otherTank.playerName;
@@ -232,7 +233,7 @@ Tank.prototype.fire = function(curTime, direction) {
 }
 
 Tank.prototype.bulletHit = function(bullet, curTime,otherTank) {
-	this.given++;
+	// this.given++;
 	this.score += 30;
 	if (this.isPlayer) showNotification("Booty returned to " + otherTank.playerName);
 	bullet.disableBullet(curTime);
@@ -393,7 +394,7 @@ Tank.prototype.toPlainObject = function() {
 		eventsQueue: this.eventsQueue,
 		score: this.score,
 		coins: this.coins,
-		given: this.given,
+		// given: this.given,
 		rescuedFloaters: this.rescuedFloaters,
 		playerName: this.playerName
 	}
