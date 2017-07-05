@@ -32,7 +32,7 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 						var otherTank = world.otherTanks[tankId];
 						if ( (dist(otherTank,this)<50 && otherTank.active) && (otherTank!=this.tank) ) {
 							
-							this.hitTank(otherTank,curTime);
+							if (this.active) this.hitTank(otherTank,curTime);
 
 						}
 
@@ -40,11 +40,11 @@ Bullet.prototype.tick = function(delta,world,curTime) {
 
 					if (!this.tank.isPlayer) {
 						if ( (dist(world.player,this)<40 ) ) {
-							this.hitTank(world.player,curTime);
+							if (this.active) this.hitTank(world.player,curTime);
 						}
 					}
 					if (world.landscape.getTerrainType({x:this.xpos,y:this.ypos})==3) {
-						this.disableBullet(curTime);
+						if (this.active) this.disableBullet(curTime);
 					}
 				
 			}
